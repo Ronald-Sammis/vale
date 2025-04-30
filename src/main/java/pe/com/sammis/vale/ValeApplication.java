@@ -7,7 +7,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ValeApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ValeApplication.class, args);
+
+
+        try {
+            SpringApplication.run(ValeApplication.class, args);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
 }
