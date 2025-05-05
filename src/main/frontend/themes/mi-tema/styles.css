@@ -1,41 +1,24 @@
-/* Variables personalizadas estilo Lumo */
-:root {
-    --lumo-size-xl: 2.5rem;
-    --lumo-size-l: 2rem;
-    --lumo-size-m: 1.75rem;
-    --lumo-size-s: 1.5rem;
-    --lumo-size-xs: 1.25rem;
+/* Importar fuente Inter desde Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    --lumo-space-xl: 1.75rem;
-    --lumo-space-l: 1.125rem;
-    --lumo-space-m: 0.5rem;
-    --lumo-space-s: 0.25rem;
-    --lumo-space-xs: 0.125rem;
+/* Aplicar la fuente a todo el documento */
+html {
+    font-family: 'Inter', sans-serif;
 
-    --lumo-primary-text-color: rgb(114, 22, 243);
-    --lumo-primary-color-50pct: rgba(114, 22, 243, 0.5);
-    --lumo-primary-color-10pct: rgba(114, 22, 243, 0.1);
-
-    --lumo-error-text-color: rgb(255, 56, 103);
-    --lumo-error-color-50pct: rgba(255, 56, 103, 0.5);
-    --lumo-error-color-10pct: rgba(255, 56, 103, 0.1);
-
-    --lumo-success-text-color: rgb(20, 184, 143);
-    --lumo-success-color-50pct: rgba(20, 184, 143, 0.5);
-    --lumo-success-color-10pct: rgba(20, 184, 143, 0.1);
-
-    --lumo-primary-color: hsl(265, 90%, 52%);
-    --lumo-error-color: hsl(346, 100%, 61%);
-    --lumo-success-color: hsl(165, 80%, 40%);
-
-    --lumo-header-text-color: hsl(285, 35%, 15%);
-    --lumo-body-text-color: hsla(285, 40%, 16%, 0.94);
-    --lumo-secondary-text-color: hsla(285, 42%, 18%, 0.72);
-    --lumo-tertiary-text-color: hsla(285, 45%, 20%, 0.5);
-    --lumo-disabled-text-color: hsla(285, 50%, 22%, 0.26);
+    --lumo-border-radius: 0px;
+    --lumo-size-xl: 3rem;
+    --lumo-size-l: 2.5rem;
+    --lumo-size-m: 2rem;
+    --lumo-size-s: 1.75rem;
+    --lumo-size-xs: 1.5rem;
 }
 
-/* Botón personalizado (equivalente a vaadin-button) */
+/* Estilo para modo oscuro (vacío por ahora) */
+html[theme~="dark"] {
+    /* Puedes agregar estilos específicos para dark mode aquí */
+}
+
+/* Estilos para vaadin-button */
 vaadin-button:not([theme~="tertiary"]) {
     background-image: linear-gradient(var(--lumo-tint-5pct), var(--lumo-shade-5pct));
     box-shadow: inset 0 0 0 1px var(--lumo-contrast-20pct);
@@ -49,17 +32,14 @@ vaadin-button[theme~="primary"] {
     text-shadow: 0 -1px 0 var(--lumo-shade-20pct);
 }
 
-/* Campo de texto personalizado (equivalente a vaadin-text-field) */
+/* Estilos para vaadin-text-field */
 vaadin-text-field::part(input-field) {
     box-shadow: inset 0 0 0 1px var(--lumo-contrast-30pct);
     background-color: var(--lumo-base-color);
+    font-family: 'Inter', sans-serif;
 }
 
 vaadin-text-field[invalid]::part(input-field) {
     box-shadow: inset 0 0 0 1px var(--lumo-error-color);
 }
 
-/* Tema oscuro (placeholder para personalización) */
-[theme~="dark"] {
-    /* Puedes añadir colores aquí si deseas soportar modo oscuro */
-}
