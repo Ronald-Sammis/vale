@@ -1,5 +1,6 @@
 package pe.com.sammis.vale.vistas;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -22,6 +23,11 @@ import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import pe.com.sammis.vale.models.Asistencia;
 import pe.com.sammis.vale.models.Empleado;
 import pe.com.sammis.vale.models.TipoAsistencia;
@@ -33,6 +39,7 @@ import pe.com.sammis.vale.util.ExcelExporter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,12 +63,16 @@ public class AsistenciaView extends VerticalLayout {
     private List<Empleado> empleadosCache;
     private LocalDate fecha;
 
-    public AsistenciaView(IEmpleadoService empleadoService, IAsistenciaService asistenciaService, ITipoAsistenciaService tipoAsistenciaService) {
+    @Autowired
+    private ExcelExporterAsistencia excelExporterAsistencia;
+
+    public AsistenciaView(IEmpleadoService empleadoService, IAsistenciaService asistenciaService, ITipoAsistenciaService tipoAsistenciaService,ExcelExporterAsistencia excelExporterAsistenci) {
         this.empleadoService = empleadoService;
         this.asistenciaService = asistenciaService;
         this.tipoAsistenciaService = tipoAsistenciaService;
         this.tiposAsistenciaCache = tipoAsistenciaService.findAll();
         this.empleadosCache = empleadoService.findAllActive();
+        this.excelExporterAsistencia = excelExporterAsistencia;
         addClassName("main-view");
         fechaPicker.setValue(LocalDate.now());
         setUpTitle();
@@ -85,7 +96,26 @@ public class AsistenciaView extends VerticalLayout {
     }
     private void exportPdf() {
     }
-    private void exportExcel(){}
+    private void exportExcel(){
+        try {
+            byte[] excelData = excelExporterAsistencia.exportarAsistenciasAExcel();
+
+            StreamResource resource = new StreamResource("asistencias.xlsx", () -> new ByteArrayInputStream(excelData));
+            resource.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+            Anchor invisibleLink = new Anchor(resource, "");
+            invisibleLink.getElement().setAttribute("download", true);
+            invisibleLink.getStyle().set("display", "none");
+            invisibleLink.setId("hidden-download");
+
+            add(invisibleLink); // Agrega el enlace oculto al layout solo para activar la descarga
+
+            getUI().ifPresent(ui -> ui.getPage().executeJs("document.getElementById('hidden-download').click();"));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private void setUpGrid() {
         grid.setColumns();
