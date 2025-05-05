@@ -43,13 +43,13 @@ public class MainLayout extends AppLayout {
         RouterLink empleadoView = new RouterLink("Gestión de empleados", EmpleadoView.class);
         RouterLink tipoView = new RouterLink("Gestión de tipos de asistencia", TipoAsistenciaView.class);
         RouterLink asistencia = new RouterLink("Gestión de asistencias", AsistenciaView.class);
-        RouterLink dashBoardView = new RouterLink("DashBoard",DashboardView.class);
+       /* RouterLink dashBoardView = new RouterLink("DashBoard",DashboardView.class);*/
 
 
 
 
 
-        sidebar.add( portalView, empleadoView,tipoView,asistencia,dashBoardView);
+        sidebar.add( portalView, empleadoView,tipoView,asistencia);
 
         addToDrawer(sidebar);
     }
