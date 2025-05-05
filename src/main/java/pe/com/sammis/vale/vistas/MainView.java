@@ -27,7 +27,7 @@ public class MainView extends VerticalLayout {
         // Ejecutar la animación después de que la vista esté montada
         getElement().executeJs("setTimeout(() => this.style.opacity = '1', 100);");
 
-        add(new com.vaadin.flow.component.html.H1("Bienvenido a la vista MainView"));
+        add(new com.vaadin.flow.component.html.H2("Bienvenido a la vista MainView"));
 
 
     }

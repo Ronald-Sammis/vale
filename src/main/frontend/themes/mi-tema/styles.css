@@ -43,3 +43,47 @@ vaadin-text-field[invalid]::part(input-field) {
     box-shadow: inset 0 0 0 1px var(--lumo-error-color);
 }
 
+
+
+
+.custom-sidebar {
+    background-color: #f8f9fa;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.sidebar-link {
+    display: flex; /* Usamos flexbox para alinear icono y texto */
+    align-items: center; /* Centramos verticalmente el icono y el texto */
+    padding: 0.25rem 0.75rem;
+    color: #333;
+    text-decoration: none !important;
+    font-size: 0.95rem;
+    border-radius: 0;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.sidebar-link .vaadin-icon { /* Estilo para el icono dentro del link */
+    margin-right: 0.5em; /* Agregamos un margen derecho para separarlo del texto */
+}
+
+.sidebar-link:hover {
+    background-color: #a5b8e1; /* Haciendo el hover más intenso */
+    color: #1d4ed8;
+    transform: translateX(2px);
+}
+
+.sidebar-link.router-link-active {
+    background-color: #bfdbfe;
+    color: #1e3a8a;
+    font-weight: 600;
+    border-left: 4px solid #1e40af;
+}
+
+
+
+
+

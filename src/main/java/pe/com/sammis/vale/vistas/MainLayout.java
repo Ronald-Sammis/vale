@@ -3,24 +3,27 @@ package pe.com.sammis.vale.vistas;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.component.icon.Icon;
 
 
 public class MainLayout extends AppLayout {
 
 
     public MainLayout() {
+
         createHeader();
         createSidebar();
     }
 
     private void createHeader() {
         DrawerToggle toggle = new DrawerToggle();
-        H1 logo = new H1("VALE");
+        H2 logo = new H2("VALE");
         logo.getStyle().set("margin", "0");
 
         HorizontalLayout header = new HorizontalLayout(toggle, logo);
@@ -38,13 +41,24 @@ public class MainLayout extends AppLayout {
         sidebar.setPadding(true);
         sidebar.setSpacing(true);
 
-        // Links de navegación
+        // Links de navegación con iconos
         RouterLink portalView = new RouterLink("Portal", MainView.class);
+        portalView.addComponentAsFirst(new Icon(VaadinIcon.HOME));
         RouterLink empleadoView = new RouterLink("Empleados", EmpleadoView.class);
+        empleadoView.addComponentAsFirst(new Icon(VaadinIcon.USER));
         RouterLink tipoView = new RouterLink("Tipos de asistencia", TipoAsistenciaView.class);
+        tipoView.addComponentAsFirst(new Icon(VaadinIcon.LIST));
         RouterLink asistencia = new RouterLink("Asistencias", AsistenciaView.class);
-        RouterLink dashBoardView = new RouterLink("DashBoard",DashboardView.class);
+        asistencia.addComponentAsFirst(new Icon(VaadinIcon.CHECK_SQUARE_O));
+        RouterLink dashBoardView = new RouterLink("DashBoard", DashboardView.class);
+        dashBoardView.addComponentAsFirst(new Icon(VaadinIcon.CHART));
 
+
+        portalView.addClassName("sidebar-link");
+        empleadoView.addClassName("sidebar-link");
+        tipoView.addClassName("sidebar-link");
+        asistencia.addClassName("sidebar-link");
+        dashBoardView.addClassName("sidebar-link");
 
 
 
