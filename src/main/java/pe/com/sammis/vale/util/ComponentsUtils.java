@@ -39,7 +39,6 @@ public class ComponentsUtils {
         return addButton;
     }
 
-
     public static <T> Button createSaveButton(Supplier<T> valueSupplier, Consumer<T> onClickAction) {
         Button saveButton = new Button("Guardar");
         saveButton.addClickListener(e -> {
@@ -87,7 +86,7 @@ public class ComponentsUtils {
         return deleteButton;
     }
 
-        public static Button createDeleteButton(Runnable onClickAction) {
+    public static Button createDeleteButton(Runnable onClickAction) {
             Button deleteButton = new Button("",new Icon(VaadinIcon.TRASH));
             deleteButton.setWidth("50px");
             deleteButton.addClickListener(e -> onClickAction.run());
@@ -95,7 +94,7 @@ public class ComponentsUtils {
             return deleteButton;
         }
 
-        public static <T> Button createCancelButton(Supplier<T> valueSupplier, Consumer<T> onClickAction) {
+    public static <T> Button createCancelButton(Supplier<T> valueSupplier, Consumer<T> onClickAction) {
             Button cancelButton = new Button("Cancelar");
             cancelButton.addClickListener(e -> {
                 T value = valueSupplier.get();
@@ -109,8 +108,6 @@ public class ComponentsUtils {
         cancelButton.addClickListener(e -> onClickAction.run());
         return cancelButton;
     }
-
-
 
     public static TextField createSearchField(String placeholder, Consumer<String> onSearch) {
         TextField searchField = new TextField();
@@ -126,29 +123,18 @@ public class ComponentsUtils {
         return searchField;
     }
 
-
     public static void setTitulo(VerticalLayout layout, Class<?> entityClass) {
         String entityName = getEntityName(entityClass);
 
         H3 title = new H3("Gestión de " + entityName);
         title.getStyle()
-                .set("margin", "0")
-                .set("color", "var(--lumo-primary-color)");
+                .set("margin", "0 0 16px 0")
+                .set("color", "#212529") // negro/gris muy oscuro
+                .set("font-weight", "700") // negrita fuerte
+                .set("text-shadow", "0 1px 2px rgba(0, 0, 0, 0.1)"); // sombra sutil
 
-        Div fakeButton = new Div();
-        fakeButton.add(title);
-        fakeButton.getStyle()
-                .set("padding", "10px")
-                .set("border", "2px solid var(--lumo-primary-color)")
-                .set("background-color", "var(--lumo-base-color)")
-                .set("border-radius", "8px")
-                .set("box-shadow", "0 4px 10px rgba(0, 0, 0, 0.1)")
-                .set("margin-bottom", "20px")
-                .set("cursor", "default"); // no pointer
-
-        layout.add(fakeButton);
+        layout.add(title);
     }
-
 
 
 
@@ -173,8 +159,6 @@ public class ComponentsUtils {
         }
         return capitalizedString.toString().trim();
     }
-
-
 
     public static void showDeleteConfirmation(Class<?> entityClass, String nombreEntidad, Runnable onDelete) {
 
@@ -212,7 +196,6 @@ public class ComponentsUtils {
         confirmDialog.open();
     }
 
-
     public static void showDeleteConfirmationAsistencia(Class<?> entityClass, LocalDate date, Runnable onDelete) {
 
         String entityName = getEntityName(entityClass);
@@ -248,7 +231,6 @@ public class ComponentsUtils {
         confirmDialog.getFooter().add(cancelar, confirmar);
         confirmDialog.open();
     }
-
 
     public static void showSaveSuccess(Class<?> entityClass, String name) {
         String entityName = getEntityName(entityClass);
