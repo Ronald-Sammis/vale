@@ -64,16 +64,14 @@ public class AsistenciaView extends VerticalLayout {
     private List<Empleado> empleadosCache;
     private LocalDate fecha;
 
-    @Autowired
-    private ExcelExporterAsistencia excelExporterAsistencia;
 
-    public AsistenciaView(IEmpleadoService empleadoService, IAsistenciaService asistenciaService, ITipoAsistenciaService tipoAsistenciaService,ExcelExporterAsistencia excelExporterAsistenci) {
+
+    public AsistenciaView(IEmpleadoService empleadoService, IAsistenciaService asistenciaService, ITipoAsistenciaService tipoAsistenciaService) {
         this.empleadoService = empleadoService;
         this.asistenciaService = asistenciaService;
         this.tipoAsistenciaService = tipoAsistenciaService;
         this.tiposAsistenciaCache = tipoAsistenciaService.findAll();
         this.empleadosCache = empleadoService.findAllActive();
-        this.excelExporterAsistencia = excelExporterAsistencia;
         addClassName("main-view");
         fechaPicker.setValue(LocalDate.now());
         setUpTitle();
@@ -150,7 +148,7 @@ public class AsistenciaView extends VerticalLayout {
                 .toList();
 
         // 4. Llamar al exportador (ExcelExporter)
-        ByteArrayOutputStream stream = ExcelExporter.exportToExcel(headers, rows);
+        ByteArrayOutputStream stream = ExcelExporter.exportToExcelOptimized(headers, rows);
 
         // 5. Crear recurso para descarga
         StreamResource resource = new StreamResource("asistencias.xlsx", () -> new ByteArrayInputStream(stream.toByteArray()));
