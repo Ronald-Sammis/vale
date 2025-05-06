@@ -126,46 +126,57 @@ public class AsistenciaView extends VerticalLayout {
         downloadLink.getElement().executeJs("setTimeout(() => this.remove(), 1000);");
     }
     private void exportExcel() {
-        // 1. Cabeceras del Excel
+        long start = System.nanoTime(); // INICIO del temporizador
+
+        // 1. Cabeceras
         List<String> headers = List.of("ID", "Fecha", "Empleado", "Apellido", "Tipo de Asistencia");
 
-
-
-        // 2. Obtener los datos visibles (en este caso desde una lista de Asistencias)
+        // 2. Obtener los datos
         List<Asistencia> asistencias = asistenciaService.findAll();
         gridReporte.setItems(asistencias);
-        gridReporte.getListDataView().getItems().toList();
 
-        // 3. Transformar los datos a listas de Strings
+        // 3. Transformar los datos
         List<List<String>> rows = asistencias.stream()
                 .map(a -> List.of(
-                        String.valueOf(a.getId()),  // ID
-                        a.getFecha() != null ? a.getFecha().toString() : "", // Fecha
-                        a.getEmpleado() != null ? a.getEmpleado().getNombre() : "", // Empleado (Nombre)
-                        a.getEmpleado() != null ? a.getEmpleado().getApellido() : "", // Empleado (Apellido)
-                        a.getTipoAsistencia() != null ? a.getTipoAsistencia().getAlias() : "" // Tipo de Asistencia (Alias)
+                        String.valueOf(a.getId()),
+                        a.getFecha() != null ? a.getFecha().toString() : "",
+                        a.getEmpleado() != null ? a.getEmpleado().getNombre() : "",
+                        a.getEmpleado() != null ? a.getEmpleado().getApellido() : "",
+                        a.getTipoAsistencia() != null ? a.getTipoAsistencia().getAlias() : ""
                 ))
                 .toList();
 
-        // 4. Llamar al exportador (ExcelExporter)
+        // 4. Exportar
         ByteArrayOutputStream stream = ExcelExporter.exportToExcelOptimized(headers, rows);
 
-        // 5. Crear recurso para descarga
+        // 5. Crear recurso
         StreamResource resource = new StreamResource("asistencias.xlsx", () -> new ByteArrayInputStream(stream.toByteArray()));
         resource.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
-        // 6. Enlace de descarga temporal
+        // 6. Enlace de descarga
         Anchor downloadLink = new Anchor(resource, "");
         downloadLink.getElement().setAttribute("download", true);
         downloadLink.getStyle().set("display", "none");
-        add(downloadLink); // Añadir al layout
+        add(downloadLink);
 
-        // 7. Hacer clic automáticamente para iniciar la descarga
+        // 7. Descargar automáticamente
         downloadLink.getElement().executeJs("this.click();");
 
-        // Opcional: remover el enlace luego de descargar
+        // 8. Limpiar después de un segundo
         downloadLink.getElement().executeJs("setTimeout(() => this.remove(), 1000);");
+
+        // 9. Medir tiempo y mostrar notificación
+        long end = System.nanoTime(); // Fin del temporizador
+        double durationSeconds = (end - start) / 1_000_000_000.0;
+
+        Notification.show(
+                String.format(Locale.US, "Exportación completada en %.1f segundos", durationSeconds),
+                3000,
+                Notification.Position.BOTTOM_END
+        );
+
     }
+
 
 
     private void setUpGrid() {
