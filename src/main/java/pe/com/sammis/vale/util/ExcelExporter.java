@@ -90,7 +90,7 @@ public class ExcelExporter {
     }
 
     public static ByteArrayOutputStream exportToExcelOptimized(List<String> headers, List<List<String>> rows) {
-        try (SXSSFWorkbook workbook = new SXSSFWorkbook(100);
+        try (SXSSFWorkbook workbook = new SXSSFWorkbook(100); // 100 filas en memoria
              ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
             SXSSFSheet sheet = workbook.createSheet("Datos");
@@ -131,20 +131,21 @@ public class ExcelExporter {
                 }
             }
 
-            // Establecer un ancho de columna predeterminado (ajusta el valor según tus necesidades)
-            int defaultColumnWidth = 20 * 256; // Ancho para 20 caracteres (aproximado)
+            // Establecer un ancho de columna predeterminado
+            int defaultColumnWidth = 20 * 256; // Ancho para 20 caracteres
             for (int i = 0; i < headers.size(); i++) {
                 sheet.setColumnWidth(i, defaultColumnWidth);
             }
 
             workbook.write(out);
-            // Dispose de los recursos temporales de SXSSFWorkbook
-            ((SXSSFWorkbook) workbook).dispose();
+            ((SXSSFWorkbook) workbook).dispose();  // Liberar recursos de SXSSFWorkbook
             return out;
 
         } catch (IOException e) {
-            e.printStackTrace();
+            // Loggear la excepción de manera adecuada
+            System.err.println("Error durante la exportación: " + e.getMessage());
             return null;
         }
     }
+
 }
