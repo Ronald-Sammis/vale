@@ -36,6 +36,7 @@ import pe.com.sammis.vale.services.interfaces.IEmpleadoService;
 import pe.com.sammis.vale.services.interfaces.ITipoAsistenciaService;
 import pe.com.sammis.vale.util.ComponentsUtils;
 import pe.com.sammis.vale.util.ExcelExporter;
+import pe.com.sammis.vale.util.PdfExporter;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -95,27 +96,79 @@ public class AsistenciaView extends VerticalLayout {
         add(toolbar);
     }
     private void exportPdf() {
+        // 1. Cabeceras del Excel
+        List<String> headers = List.of("ID", "Fecha", "Empleado", "Apellido", "Tipo de Asistencia");
+
+        // 2. Obtener los datos visibles (en este caso desde una lista de Asistencias)
+        List<Asistencia> asistencias = asistenciaService.findAll();
+        gridReporte.setItems(asistencias);
+        gridReporte.getListDataView().getItems().toList();
+
+        // 3. Transformar los datos a listas de Strings
+        List<List<String>> rows = asistencias.stream()
+                .map(a -> List.of(
+                        String.valueOf(a.getId()),  // ID
+                        a.getFecha() != null ? a.getFecha().toString() : "", // Fecha
+                        a.getEmpleado() != null ? a.getEmpleado().getNombre() : "", // Empleado (Nombre)
+                        a.getEmpleado() != null ? a.getEmpleado().getApellido() : "", // Empleado (Apellido)
+                        a.getTipoAsistencia() != null ? a.getTipoAsistencia().getAlias() : "" // Tipo de Asistencia (Alias)
+                ))
+                .toList();
+
+        ByteArrayOutputStream pdfStream = PdfExporter.exportToPdf(headers, rows);
+
+        StreamResource resource = new StreamResource("empleados.pdf", () -> new ByteArrayInputStream(pdfStream.toByteArray()));
+        resource.setContentType("application/pdf");
+
+        Anchor downloadLink = new Anchor(resource, "");
+        downloadLink.getElement().setAttribute("download", true);
+        downloadLink.getStyle().set("display", "none");
+        add(downloadLink);
+        downloadLink.getElement().executeJs("this.click();");
+        downloadLink.getElement().executeJs("setTimeout(() => this.remove(), 1000);");
     }
-    private void exportExcel(){
-        try {
-            byte[] excelData = excelExporterAsistencia.exportarAsistenciasAExcel();
+    private void exportExcel() {
+        // 1. Cabeceras del Excel
+        List<String> headers = List.of("ID", "Fecha", "Empleado", "Apellido", "Tipo de Asistencia");
 
-            StreamResource resource = new StreamResource("asistencias.xlsx", () -> new ByteArrayInputStream(excelData));
-            resource.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
-            Anchor invisibleLink = new Anchor(resource, "");
-            invisibleLink.getElement().setAttribute("download", true);
-            invisibleLink.getStyle().set("display", "none");
-            invisibleLink.setId("hidden-download");
 
-            add(invisibleLink); // Agrega el enlace oculto al layout solo para activar la descarga
+        // 2. Obtener los datos visibles (en este caso desde una lista de Asistencias)
+        List<Asistencia> asistencias = asistenciaService.findAll();
+        gridReporte.setItems(asistencias);
+        gridReporte.getListDataView().getItems().toList();
 
-            getUI().ifPresent(ui -> ui.getPage().executeJs("document.getElementById('hidden-download').click();"));
+        // 3. Transformar los datos a listas de Strings
+        List<List<String>> rows = asistencias.stream()
+                .map(a -> List.of(
+                        String.valueOf(a.getId()),  // ID
+                        a.getFecha() != null ? a.getFecha().toString() : "", // Fecha
+                        a.getEmpleado() != null ? a.getEmpleado().getNombre() : "", // Empleado (Nombre)
+                        a.getEmpleado() != null ? a.getEmpleado().getApellido() : "", // Empleado (Apellido)
+                        a.getTipoAsistencia() != null ? a.getTipoAsistencia().getAlias() : "" // Tipo de Asistencia (Alias)
+                ))
+                .toList();
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // 4. Llamar al exportador (ExcelExporter)
+        ByteArrayOutputStream stream = ExcelExporter.exportToExcel(headers, rows);
+
+        // 5. Crear recurso para descarga
+        StreamResource resource = new StreamResource("asistencias.xlsx", () -> new ByteArrayInputStream(stream.toByteArray()));
+        resource.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+        // 6. Enlace de descarga temporal
+        Anchor downloadLink = new Anchor(resource, "");
+        downloadLink.getElement().setAttribute("download", true);
+        downloadLink.getStyle().set("display", "none");
+        add(downloadLink); // Añadir al layout
+
+        // 7. Hacer clic automáticamente para iniciar la descarga
+        downloadLink.getElement().executeJs("this.click();");
+
+        // Opcional: remover el enlace luego de descargar
+        downloadLink.getElement().executeJs("setTimeout(() => this.remove(), 1000);");
     }
+
 
     private void setUpGrid() {
         grid.setColumns();

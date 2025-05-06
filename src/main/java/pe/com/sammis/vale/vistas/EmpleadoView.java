@@ -67,8 +67,7 @@ public class EmpleadoView extends VerticalLayout {
         toolbar.getStyle().set("margin-bottom", "20px");
         add(toolbar);
     }
-
-    private void exportPdf(){} /*{
+    private void exportPdf() {
         // 1. Cabeceras del Excel
         List<String> headers = List.of("ID", "Nombres","Apellido", "DNI","Estado");
 
@@ -97,10 +96,8 @@ public class EmpleadoView extends VerticalLayout {
         add(downloadLink);
         downloadLink.getElement().executeJs("this.click();");
         downloadLink.getElement().executeJs("setTimeout(() => this.remove(), 1000);");
-    }*/
-
-
-    private void exportExcel(){} /*{
+    }
+    private void exportExcel() {
         // 1. Cabeceras del Excel
         List<String> headers = List.of("ID", "Nombres","Apellido", "DNI","Estado");
 
@@ -136,15 +133,13 @@ public class EmpleadoView extends VerticalLayout {
 
         // Opcional: remover luego de descargar
         downloadLink.getElement().executeJs("setTimeout(() => this.remove(), 1000);");
-    }*/
-
-
+    }
     private void setUpGrid() {
 
 
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
         grid.setColumns("dni");
-        grid.getColumnByKey("dni").setWidth("80px").setFlexGrow(0);
+        grid.getColumnByKey("dni").setWidth("75px").setFlexGrow(0);
         grid.getElement().getStyle().set("font-size", "13px");
         grid.addColumn(empleado -> {
                     String apellido = ComponentsUtils.capitalizeFirstLetter(empleado.getApellido());
@@ -155,7 +150,7 @@ public class EmpleadoView extends VerticalLayout {
                     // Formatear el apellido en negrita y el nombre normal con un HTML
                     return "<b>" + apellido + "</b> " + nombre;
                 }).setHeader("Nombre Completo")
-                .setWidth("130px")
+                .setWidth("230px")
                 .setFlexGrow(0)
                 .setRenderer(new ComponentRenderer<>(item -> {
 
@@ -163,7 +158,7 @@ public class EmpleadoView extends VerticalLayout {
                     Div div = new Div();
                     div.getElement().setProperty("innerHTML", "<b>" + item.getApellido() + "</b> " + item.getNombre());
                     return div;
-        }));
+        })).setSortable(true);
         grid.addComponentColumn(empleado -> {
             Button editButton = ComponentsUtils.createEditButton(() -> empleado, this::openFormForEdit);
             Button deleteButton = ComponentsUtils.createDeleteButton(() -> empleado, this::delete);

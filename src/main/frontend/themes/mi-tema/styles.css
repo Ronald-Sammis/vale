@@ -47,7 +47,7 @@ vaadin-text-field[invalid]::part(input-field) {
 
 
 .custom-sidebar {
-    background-color: #f8f9fa;
+    background-color: #e8ecee;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     padding-left: 0.5rem;
