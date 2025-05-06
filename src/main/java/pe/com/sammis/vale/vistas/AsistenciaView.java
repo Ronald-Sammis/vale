@@ -129,7 +129,7 @@ public class AsistenciaView extends VerticalLayout {
         long start = System.nanoTime(); // INICIO del temporizador
 
         // 1. Cabeceras
-        List<String> headers = List.of("ID", "Fecha", "Empleado", "Apellido", "Tipo de Asistencia");
+        List<String> headers = List.of("Fecha", "Empleado", "Apellido", "Tipo de Asistencia");
 
         // 2. Obtener los datos
         List<Asistencia> asistencias = asistenciaService.findAll();
@@ -138,7 +138,6 @@ public class AsistenciaView extends VerticalLayout {
         // 3. Transformar los datos
         List<List<String>> rows = asistencias.stream()
                 .map(a -> List.of(
-                        String.valueOf(a.getId()),
                         a.getFecha() != null ? a.getFecha().toString() : "",
                         a.getEmpleado() != null ? a.getEmpleado().getNombre() : "",
                         a.getEmpleado() != null ? a.getEmpleado().getApellido() : "",
