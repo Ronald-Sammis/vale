@@ -175,9 +175,6 @@ public class AsistenciaView extends VerticalLayout {
         );
 
     }
-
-
-
     private void setUpGrid() {
         grid.setColumns();
         grid.addColumn(fecha -> fecha.toString()).setHeader("Fecha").setWidth("100px").setFlexGrow(0);
@@ -286,16 +283,16 @@ public class AsistenciaView extends VerticalLayout {
 
         empleadoGrid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
         empleadoGrid.getElement().getStyle().set("font-size", "13px");
-        empleadoGrid.setWidth("420px");
+        empleadoGrid.setWidth("750px");
         empleadoGrid.addColumn(empleado -> "<b>" + empleado.getApellido() + "</b> " + empleado.getNombre())
                 .setHeader("Nombre Completo")
-                .setWidth("118px")
+                .setWidth("220px")
                 .setFlexGrow(0)
                 .setRenderer(new ComponentRenderer<>(item -> {
                     Div div = new Div();
                     div.getElement().setProperty("innerHTML", "<b>" + item.getApellido() + "</b> " + item.getNombre());
                     return div;
-                }));
+                })).setSortable(true);
 
         empleadoGrid.addColumn(new ComponentRenderer<>(empleado -> {
             RadioButtonGroup<TipoAsistencia> radioGroup = new RadioButtonGroup<>();
@@ -333,7 +330,7 @@ public class AsistenciaView extends VerticalLayout {
             }
 
             return radioGroup;
-        })).setHeader("Tipo de Asistencia").setWidth("280px").setFlexGrow(0);
+        })).setHeader("Tipo de Asistencia").setWidth("500px").setFlexGrow(0);
 
         empleadoGrid.setItems(empleadosCache);
         empleadoGrid.setHeight("400px");
@@ -480,10 +477,10 @@ public class AsistenciaView extends VerticalLayout {
         Grid<Empleado> nuevoEmpleadoGrid = new Grid<>(Empleado.class, false);
         nuevoEmpleadoGrid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
         nuevoEmpleadoGrid.getElement().getStyle().set("font-size", "13px");
-        nuevoEmpleadoGrid.setWidth("420px");
+        nuevoEmpleadoGrid.setWidth("750px");
         nuevoEmpleadoGrid.addColumn(empleado -> "<b>" + empleado.getApellido() + "</b> " + empleado.getNombre())
                 .setHeader("Nombre Completo")
-                .setWidth("118px")
+                .setWidth("220px")
                 .setFlexGrow(0)
                 .setRenderer(new ComponentRenderer<>(item -> {
                     Div div = new Div();
@@ -521,7 +518,7 @@ public class AsistenciaView extends VerticalLayout {
                 }
             }
             return radioGroup;
-        })).setHeader("Tipo de Asistencia").setWidth("280px").setFlexGrow(0);
+        })).setHeader("Tipo de Asistencia").setWidth("500px").setFlexGrow(0);
 
         nuevoEmpleadoGrid.setItems(empleadosCache);
         formLayout.replace(empleadoGrid, nuevoEmpleadoGrid);

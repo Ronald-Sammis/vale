@@ -217,6 +217,7 @@ public class EmpleadoView extends VerticalLayout {
             nuevoEmpleado.setDni(dni);
             nuevoEmpleado.setNombre(nombre);
             nuevoEmpleado.setApellido(apellido);
+            nuevoEmpleado.setEstado(true);
             service.save(nuevoEmpleado);
             ComponentsUtils.showSaveSuccess(Empleado.class,nuevoEmpleado.getNombre());
         } else {
@@ -239,6 +240,7 @@ public class EmpleadoView extends VerticalLayout {
             empleado.setDni(dni);
             empleado.setNombre(nombre);
             empleado.setApellido(apellido);
+            empleado.setEstado(true);
             service.save(empleado);
         }
 

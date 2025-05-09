@@ -6,7 +6,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.springframework.stereotype.Component;
+import pe.com.sammis.vale.models.Asistencia;
 import pe.com.sammis.vale.services.interfaces.IDashboardService;
+import pe.com.sammis.vale.util.ComponentsUtils;
 
 @Route(value = "dashBoard", layout = MainLayout.class)
 @UIScope
@@ -21,7 +23,7 @@ public class DashboardView extends VerticalLayout {
         setSpacing(true);
         setPadding(true);
 
-        H2 titulo = new H2("Resumen de Asistencias");
+        setUpTitle();
 
         // Layout vertical para tarjetas
         VerticalLayout layoutTarjetas = new VerticalLayout();
@@ -45,8 +47,12 @@ public class DashboardView extends VerticalLayout {
                 totalFechasTomadas
         );
 
-        add(titulo, layoutTarjetas);
+        add( layoutTarjetas);
     }
+    private void setUpTitle() {
+        ComponentsUtils.setTitulo(this, DashboardView.class);
+    }
+
 
     private Span crearTarjeta(String titulo, String valor) {
         Span tarjeta = new Span(titulo + ": " + valor);

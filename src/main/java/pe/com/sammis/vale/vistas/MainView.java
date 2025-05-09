@@ -14,8 +14,6 @@ import com.vaadin.flow.theme.lumo.Lumo;
 
 public class MainView extends VerticalLayout {
 
-
-
     public MainView() {
         addClassName("main-view");
         setSizeFull();
@@ -28,7 +26,6 @@ public class MainView extends VerticalLayout {
         getElement().executeJs("setTimeout(() => this.style.opacity = '1', 100);");
 
         add(new com.vaadin.flow.component.html.H2("Bienvenido a la vista MainView"));
-
 
     }
 }
