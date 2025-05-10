@@ -486,7 +486,7 @@ public class AsistenciaView extends VerticalLayout {
                     Div div = new Div();
                     div.getElement().setProperty("innerHTML", "<b>" + item.getApellido() + "</b> " + item.getNombre());
                     return div;
-                }));
+                })).setSortable(true);
 
         nuevoEmpleadoGrid.addColumn(new ComponentRenderer<>(empleado -> {
             RadioButtonGroup<TipoAsistencia> radioGroup = new RadioButtonGroup<>();
