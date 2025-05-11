@@ -21,6 +21,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,6 +43,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -177,7 +179,16 @@ public class AsistenciaView extends VerticalLayout {
     }
     private void setUpGrid() {
         grid.setColumns();
-        grid.addColumn(fecha -> fecha.toString()).setHeader("Fecha").setWidth("100px").setFlexGrow(0);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        grid.addColumn(fecha -> {
+            if (fecha instanceof LocalDate) {
+                return ((LocalDate) fecha).format(dateFormatter);
+            } else {
+                return fecha.toString(); // O maneja otros tipos de fecha si es necesario
+            }
+        }).setHeader("Fecha").setWidth("100px").setFlexGrow(0);
+
         grid.getElement().getStyle().set("font-size", "13px");
         grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
         grid.addComponentColumn(fecha -> {
@@ -264,7 +275,7 @@ public class AsistenciaView extends VerticalLayout {
             return "black";
         }
     }
-    private void setUpForm() {
+    /*private void setUpForm() {
         TextField searchField = ComponentsUtils.createSearchField("Buscar", this::search);
         Button saveButton = ComponentsUtils.createSaveButton(this::save);
         Button cancelButton = ComponentsUtils.createCancelButton(this::cancelForm);
@@ -293,6 +304,14 @@ public class AsistenciaView extends VerticalLayout {
                     div.getElement().setProperty("innerHTML", "<b>" + item.getApellido() + "</b> " + item.getNombre());
                     return div;
                 })).setSortable(true);
+
+
+
+
+
+
+
+
 
         empleadoGrid.addColumn(new ComponentRenderer<>(empleado -> {
             RadioButtonGroup<TipoAsistencia> radioGroup = new RadioButtonGroup<>();
@@ -367,7 +386,146 @@ public class AsistenciaView extends VerticalLayout {
                     });
         });
         // **FIN DEL BLOQUE DE CÓDIGO DEL CHECKBOX (CORREGIDO)**
+    }*/
+
+    private void setUpForm() {
+        TextField searchField = ComponentsUtils.createSearchField("Buscar", this::search);
+        Button saveButton = ComponentsUtils.createSaveButton(this::save);
+        Button cancelButton = ComponentsUtils.createCancelButton(this::cancelForm);
+        Checkbox selectAllPCheckbox = new Checkbox("Seleccionar todos con 'P'");
+
+        HorizontalLayout titleLayout = new HorizontalLayout(titulo);
+        titleLayout.setSpacing(true);
+
+        HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, cancelButton, searchField);
+        buttonLayout.setSpacing(true);
+
+        HorizontalLayout checkLayout = new HorizontalLayout(selectAllPCheckbox);
+        checkLayout.setSpacing(true);
+
+        formLayout.setAlignItems(Alignment.BASELINE);
+
+        empleadoGrid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
+        empleadoGrid.getElement().getStyle().set("font-size", "13px");
+        empleadoGrid.setWidth("750px");
+
+        empleadoGrid.addColumn(empleado -> "<b>" + empleado.getApellido() + "</b> " + empleado.getNombre())
+                .setHeader("Nombre Completo")
+                .setWidth("220px")
+                .setFlexGrow(0)
+                .setRenderer(new ComponentRenderer<>(item -> {
+                    Div div = new Div();
+                    div.getElement().setProperty("innerHTML", "<b>" + item.getApellido() + "</b> " + item.getNombre());
+                    return div;
+                }))
+                .setSortable(true)
+                .setKey("nombreCompleto");
+
+        empleadoGrid.addColumn(new ComponentRenderer<>(empleado -> {
+            RadioButtonGroup<TipoAsistencia> radioGroup = new RadioButtonGroup<>();
+            radioGroup.setItems(tiposAsistenciaCache);
+            radioGroup.setItemLabelGenerator(TipoAsistencia::getAlias);
+            radioGroup.setWidthFull();
+            radioGroup.getElement().getStyle().set("font-size", "10px");
+            radioGroup.getElement().getStyle().set("padding", "2px");
+
+            Map<Long, Span> spanPorTipo = new HashMap<>();
+            asistenciaSeleccionada.put(empleado.getId(), radioGroup);
+
+            radioGroup.setRenderer(new ComponentRenderer<>(tipo -> {
+                Span span = new Span(tipo.getAlias());
+                span.getStyle().set("padding", "3px 6px");
+                span.getStyle().set("border-radius", "4px");
+                span.getStyle().set("transition", "all 0.3s ease");
+                spanPorTipo.put(tipo.getId(), span);
+                return span;
+            }));
+
+            // Selección inicial
+            Long tipoAsistenciaId = asistenciasMap.get(empleado.getId());
+            TipoAsistencia asistenciaPrevia = tiposAsistenciaCache.stream()
+                    .filter(ta -> ta.getId().equals(tipoAsistenciaId))
+                    .findFirst()
+                    .orElseGet(() -> tiposAsistenciaCache.stream()
+                            .filter(ta -> "SR".equalsIgnoreCase(ta.getAlias()))
+                            .findFirst()
+                            .orElse(null));
+
+            if (asistenciaPrevia != null) {
+                radioGroup.setValue(asistenciaPrevia);
+                actualizarEstilo(spanPorTipo, asistenciaPrevia);
+            }
+
+            radioGroup.addValueChangeListener(event -> {
+                actualizarEstilo(spanPorTipo, event.getValue());
+            });
+
+            return radioGroup;
+        })).setHeader("Tipo de Asistencia").setWidth("500px").setFlexGrow(0);
+
+        empleadoGrid.setItems(empleadosCache);
+        empleadoGrid.setHeight("400px");
+
+        formLayout.add(titleLayout, buttonLayout, checkLayout, empleadoGrid);
+        formDialog.add(formLayout);
+        formDialog.setCloseOnOutsideClick(false);
+
+        // BLOQUE DE CÓDIGO DEL CHECKBOX
+        selectAllPCheckbox.addValueChangeListener(event -> {
+            boolean isChecked = event.getValue();
+            empleadoGrid.getDataProvider().fetch(new Query<>())
+                    .forEach(empleado -> {
+                        RadioButtonGroup<TipoAsistencia> radioGroup = asistenciaSeleccionada.get(empleado.getId());
+                        if (radioGroup != null) {
+                            radioGroup.getDataProvider().fetch(new Query<>())
+                                    .forEach(tipoAsistencia -> {
+                                        if ("P".equalsIgnoreCase(tipoAsistencia.getAlias())) {
+                                            if (isChecked) {
+                                                radioGroup.setValue(tipoAsistencia);
+                                            } else {
+                                                radioGroup.getDataProvider().fetch(new Query<>())
+                                                        .filter(ta -> "SR".equalsIgnoreCase(ta.getAlias()))
+                                                        .findFirst()
+                                                        .ifPresentOrElse(
+                                                                radioGroup::setValue,
+                                                                radioGroup::clear
+                                                        );
+                                            }
+                                        }
+                                    });
+                        }
+                    });
+        });
     }
+
+    private void actualizarEstilo(Map<Long, Span> spanPorTipo, TipoAsistencia seleccionada) {
+        for (Map.Entry<Long, Span> entry : spanPorTipo.entrySet()) {
+            Span span = entry.getValue();
+            span.getStyle().remove("background-color");
+            span.getStyle().remove("color");
+        }
+
+        if (seleccionada != null && spanPorTipo.containsKey(seleccionada.getId())) {
+            Span spanSeleccionado = spanPorTipo.get(seleccionada.getId());
+            String backgroundColor = seleccionada.getColorHex();
+            spanSeleccionado.getStyle().set("background-color", backgroundColor);
+            spanSeleccionado.getStyle().set("color", determineTextColor(backgroundColor));
+        }
+    }
+
+    private String determineTextColor(String backgroundColor) {
+        if (backgroundColor == null || backgroundColor.isEmpty()) {
+            return "#000000"; // color por defecto
+        }
+        int r = Integer.valueOf(backgroundColor.substring(1, 3), 16);
+        int g = Integer.valueOf(backgroundColor.substring(3, 5), 16);
+        int b = Integer.valueOf(backgroundColor.substring(5, 7), 16);
+        double luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance > 0.5 ? "#000000" : "#FFFFFF";
+    }
+
+
+
     private void search(String s) {
         String filtro = s.trim().toLowerCase();
 
@@ -448,7 +606,7 @@ public class AsistenciaView extends VerticalLayout {
         if (!validarFecha(fecha)) return;
         if (!validarExistenciaDeEmpleadosYTiposDeAsistencia()) return;
 
-        titulo.setText("Nueva Asistencia para el día: " + fecha);
+        titulo.setText("Nueva Asistencia para el día: " + fecha.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         fechaPicker.setValue(fecha);
 
         // Resetear las selecciones y el mapa de asistencias para el nuevo formulario
