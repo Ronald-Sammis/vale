@@ -11,6 +11,8 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -22,6 +24,7 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
+import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import jakarta.servlet.http.HttpServletResponse;
@@ -65,6 +68,9 @@ public class AsistenciaView extends VerticalLayout {
     private List<TipoAsistencia> tiposAsistenciaCache;
     private List<Empleado> empleadosCache;
     private LocalDate fecha;
+    private Button exportExelButton=new Button("XLS");
+    private Button exportPDFButton=new Button("PDF");
+    private Button addButton=new Button("Nuevo");
 
 
 
@@ -88,13 +94,32 @@ public class AsistenciaView extends VerticalLayout {
     private void setUpToolbar() {
         fechaPicker.addValueChangeListener(event -> updateGrid());
         fechaPicker.setLocale(new Locale("es", "ES"));
-        Button addButton = ComponentsUtils.createAddButton(() -> fechaPicker.getValue(), this::openFormForNew);
-        Button exportExel=ComponentsUtils.createExcelButton(this::exportExcel);
-        Button exportPDF=ComponentsUtils.createPdfButton(this::exportPdf);
-        HorizontalLayout toolbar=new HorizontalLayout(fechaPicker,addButton,exportExel,exportPDF);
-        toolbar.getStyle().set("margin-bottom", "20px");
+
+        addButton.addClickListener(e -> {
+            LocalDate fecha = fechaPicker.getValue(); // Obtener la fecha seleccionada
+
+            // Validar antes de continuar
+            if (!validarFecha(fecha)) {
+                return;
+            }
+
+            if (!validarExistenciaDeEmpleadosYTiposDeAsistencia()) {
+                return;
+            }
+
+            // Todas las validaciones pasaron, se puede navegar
+            Map<String, List<String>> parameters = new HashMap<>();
+            parameters.put("fecha", List.of(fecha.toString()));
+            UI.getCurrent().navigate("registrar-asistencia", new QueryParameters(parameters));
+        });
+
+        exportExelButton.addClickListener(e -> exportExcel());
+        exportPDFButton.addClickListener(e -> exportPdf());
+
+        HorizontalLayout toolbar = new HorizontalLayout(fechaPicker, addButton, exportExelButton, exportPDFButton);
         add(toolbar);
     }
+
     private void exportPdf() {
         // 1. Cabeceras del Excel
         List<String> headers = List.of("ID", "Fecha", "Empleado", "Apellido", "Tipo de Asistencia");
@@ -188,14 +213,19 @@ public class AsistenciaView extends VerticalLayout {
                 return fecha.toString(); // O maneja otros tipos de fecha si es necesario
             }
         }).setHeader("Fecha").setWidth("100px").setFlexGrow(0);
-
-        grid.getElement().getStyle().set("font-size", "13px");
-        grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
         grid.addComponentColumn(fecha -> {
-            Button editButton = ComponentsUtils.createEditButton(() -> fecha, this::openFormForEdit);
-            Button deleteButton = ComponentsUtils.createDeleteButton(() -> fecha, this::delete);
-            Button viewButton = ComponentsUtils.createViewButton(() -> fecha,this::view);
-            return new HorizontalLayout(editButton, deleteButton,viewButton);
+
+            Span editSpan = new Span(new Icon(VaadinIcon.EDIT)) {{ getStyle().set("cursor", "pointer"); addClickListener(e -> openFormForEdit(fecha)); }};
+            Span deleteSpan = new Span(new Icon(VaadinIcon.TRASH)) {{ getStyle().set("cursor", "pointer");addClickListener(e -> delete(fecha)); }};
+            Span viewSpan = new Span(new Icon(VaadinIcon.SEARCH)) {{ getStyle().set("cursor", "pointer");addClickListener(e -> view(fecha)); }};
+
+
+
+
+
+
+
+            return new HorizontalLayout(editSpan, deleteSpan,viewSpan);
         }).setHeader("Acciones");
         add(grid);
         updateGrid();
@@ -387,7 +417,6 @@ public class AsistenciaView extends VerticalLayout {
         });
         // **FIN DEL BLOQUE DE CÓDIGO DEL CHECKBOX (CORREGIDO)**
     }*/
-
     private void setUpForm() {
         TextField searchField = ComponentsUtils.createSearchField("Buscar", this::search);
         Button saveButton = ComponentsUtils.createSaveButton(this::save);
@@ -497,7 +526,6 @@ public class AsistenciaView extends VerticalLayout {
                     });
         });
     }
-
     private void actualizarEstilo(Map<Long, Span> spanPorTipo, TipoAsistencia seleccionada) {
         for (Map.Entry<Long, Span> entry : spanPorTipo.entrySet()) {
             Span span = entry.getValue();
@@ -512,7 +540,6 @@ public class AsistenciaView extends VerticalLayout {
             spanSeleccionado.getStyle().set("color", determineTextColor(backgroundColor));
         }
     }
-
     private String determineTextColor(String backgroundColor) {
         if (backgroundColor == null || backgroundColor.isEmpty()) {
             return "#000000"; // color por defecto
@@ -523,9 +550,6 @@ public class AsistenciaView extends VerticalLayout {
         double luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
         return luminance > 0.5 ? "#000000" : "#FFFFFF";
     }
-
-
-
     private void search(String s) {
         String filtro = s.trim().toLowerCase();
 

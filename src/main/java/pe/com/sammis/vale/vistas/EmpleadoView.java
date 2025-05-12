@@ -4,16 +4,15 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import org.json.JSONException;
@@ -40,6 +39,9 @@ public class EmpleadoView extends VerticalLayout {
     private final TextField apellidoField = new TextField("Apellido");
     private Button saveButton;
     private Button cancelButton ;
+    private Button addButton=new Button("Nuevo");
+    private Button exportExelButton=new Button("XLS");
+    private Button exportPDFButton=new Button("PDF");
     private final Dialog formDialog = new Dialog();
     private Empleado empleado;
     private Binder<Empleado> binder = new Binder<>(Empleado.class);
@@ -60,11 +62,15 @@ public class EmpleadoView extends VerticalLayout {
     }
     private void setUpToolbar() {
         TextField searchField = ComponentsUtils.createSearchField("Buscar", this::search);
-        Button addButton = ComponentsUtils.createAddButton(this::openFormForNew);
-        Button exportExel=ComponentsUtils.createExcelButton(this::exportExcel);
-        Button exportPDF=ComponentsUtils.createPdfButton(this::exportPdf);
-        HorizontalLayout toolbar = new HorizontalLayout(searchField, addButton,exportExel,exportPDF);
-        toolbar.getStyle().set("margin-bottom", "20px");
+
+        addButton.addClickListener(e -> {openFormForNew();});
+        exportExelButton.addClickListener(e -> {exportExcel();});
+        exportPDFButton.addClickListener(e -> {exportPdf();});
+
+
+
+        HorizontalLayout toolbar = new HorizontalLayout(searchField, addButton,exportExelButton,exportPDFButton);
+
         add(toolbar);
     }
     private void exportPdf() {
@@ -136,33 +142,26 @@ public class EmpleadoView extends VerticalLayout {
     }
     private void setUpGrid() {
 
-
-        grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
-        grid.setColumns("dni");
-        grid.getColumnByKey("dni").setWidth("75px").setFlexGrow(0);
-        grid.getElement().getStyle().set("font-size", "13px");
+        grid.setColumns();
+        grid.addColumn("dni").setWidth("100px").setFlexGrow(0);
         grid.addColumn(empleado -> {
                     String apellido = ComponentsUtils.capitalizeFirstLetter(empleado.getApellido());
                     String nombre = ComponentsUtils.capitalizeFirstLetter(empleado.getNombre());
 
-
-
-                    // Formatear el apellido en negrita y el nombre normal con un HTML
-                    return "<b>" + apellido + "</b> " + nombre;
+                    // Concatenar el apellido y nombre, sin formato adicional
+                    return apellido + " " + nombre;
                 }).setHeader("Nombre Completo")
-                .setWidth("230px")
+                .setWidth("300px")
                 .setFlexGrow(0)
-                .setRenderer(new ComponentRenderer<>(item -> {
+                .setSortable(true);
 
-                    // Crear un componente Div para aplicar el formato HTML
-                    Div div = new Div();
-                    div.getElement().setProperty("innerHTML", "<b>" + item.getApellido() + "</b> " + item.getNombre());
-                    return div;
-        })).setSortable(true);
+
         grid.addComponentColumn(empleado -> {
-            Button editButton = ComponentsUtils.createEditButton(() -> empleado, this::openFormForEdit);
-            Button deleteButton = ComponentsUtils.createDeleteButton(() -> empleado, this::delete);
-            return new HorizontalLayout(editButton, deleteButton);
+
+            Span editSpan = new Span(new Icon(VaadinIcon.EDIT)) {{ getStyle().set("cursor", "pointer"); addClickListener(e -> openFormForEdit(empleado)); }};
+            Span deleteSpan = new Span(new Icon(VaadinIcon.TRASH)) {{ getStyle().set("cursor", "pointer");addClickListener(e -> delete(empleado)); }};
+
+            return new HorizontalLayout(editSpan, deleteSpan);
         }).setHeader("Acciones");
         add(grid);
         updateGrid();

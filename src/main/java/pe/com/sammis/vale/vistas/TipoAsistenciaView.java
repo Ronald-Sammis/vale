@@ -7,6 +7,9 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Input;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -28,7 +31,7 @@ public class TipoAsistenciaView extends VerticalLayout {
     private final TextField colorHexField = new TextField("ColorHex");
     private Button saveButton;
     private Button cancelButton;
-    private Button newButton = new Button("Nuevo");
+    private Button addButton = new Button("Nuevo");
     private final TextField searchField = new TextField();
     private final Dialog formDialog = new Dialog();
     private Input colorPicker = new Input();
@@ -50,17 +53,18 @@ public class TipoAsistenciaView extends VerticalLayout {
     }
     private void setUpToolbar() {
         TextField searchField = ComponentsUtils.createSearchField("Buscar", this::search);
-        newButton = ComponentsUtils.createAddButton(this::openFormForNew);
-        HorizontalLayout toolbar = new HorizontalLayout(searchField,newButton);
-        toolbar.getStyle().set("margin-bottom", "20px");
+
+
+        addButton.addClickListener(e -> {openFormForNew();});
+
+        HorizontalLayout toolbar = new HorizontalLayout(searchField,addButton);
         add(toolbar);
     }
     private void setUpGrid() {
-        grid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
+
         grid.setColumns("nombre","alias");
-        grid.getColumnByKey("nombre").setWidth("100px").setFlexGrow(0);
-        grid.getColumnByKey("alias").setWidth("60px").setFlexGrow(0);
-        grid.getElement().getStyle().set("font-size", "13px");
+        grid.getColumnByKey("nombre").setWidth("150px").setFlexGrow(0);
+        grid.getColumnByKey("alias").setWidth("80px").setFlexGrow(0);
         grid.addComponentColumn(tipo -> {
                     Div colorPreview = new Div();
                     String colorHex = tipo.getColorHex();
@@ -74,9 +78,14 @@ public class TipoAsistenciaView extends VerticalLayout {
                     return colorPreview;
                 }).setHeader("Color").setWidth("60px").setFlexGrow(0);
         grid.addComponentColumn(tipoAsistencia -> {
-            Button editButton = ComponentsUtils.createEditButton(()->tipoAsistencia,this::openFormForEdit);
-            Button deleteButton = ComponentsUtils.createDeleteButton(()->tipoAsistencia,this::delete);
-            return new HorizontalLayout(editButton, deleteButton);
+
+            Span editSpan = new Span(new Icon(VaadinIcon.EDIT)) {{ getStyle().set("cursor", "pointer"); addClickListener(e -> openFormForEdit(tipoAsistencia)); }};
+            Span deleteSpan = new Span(new Icon(VaadinIcon.TRASH)) {{ getStyle().set("cursor", "pointer");addClickListener(e -> delete(tipoAsistencia)); }};
+
+
+
+
+            return new HorizontalLayout(editSpan, deleteSpan);
         }).setHeader("Acciones");
         add(grid);
         updateGrid();

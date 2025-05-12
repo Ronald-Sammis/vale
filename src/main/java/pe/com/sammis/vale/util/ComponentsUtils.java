@@ -126,7 +126,20 @@ public class ComponentsUtils {
     public static void setTitulo(VerticalLayout layout, Class<?> entityClass) {
         String entityName = getEntityName(entityClass);
 
-        H3 title = new H3("Gestión de " + entityName);
+        H4 title = new H4("Gestión de " + entityName);
+        title.getStyle()
+                .set("margin", "0 0 16px 0")
+                .set("color", "#212529") // negro/gris muy oscuro
+                .set("font-weight", "700") // negrita fuerte
+                .set("text-shadow", "0 1px 2px rgba(0, 0, 0, 0.1)"); // sombra sutil
+
+        layout.add(title);
+    }
+
+    public static void setTitulo(VerticalLayout layout, Class<?> entityClass,String textoAgregado) {
+        String entityName = getEntityName(entityClass);
+
+        H3 title = new H3("Gestión de " + entityName+ " " + textoAgregado);
         title.getStyle()
                 .set("margin", "0 0 16px 0")
                 .set("color", "#212529") // negro/gris muy oscuro
