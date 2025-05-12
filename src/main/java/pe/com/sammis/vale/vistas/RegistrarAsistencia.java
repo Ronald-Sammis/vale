@@ -38,16 +38,16 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
     private final VerticalLayout formLayout = new VerticalLayout();
     private final H4 titulo = new H4();
     private List<TipoAsistencia> tiposAsistenciaCache;
-    private final Map<Long, RadioButtonGroup<TipoAsistencia>> asistenciaSeleccionada = new HashMap<>();
-    private final Map<Long, Long> asistenciasMap = new HashMap<>();
+    // Usaremos este mapa para almacenar la selección por empleado ID
+    private final Map<Long, Long> asistenciaSeleccionada = new HashMap<>();
     private final IAsistenciaService asistenciaService;
     private final ITipoAsistenciaService tipoAsistenciaService;
     private List<Empleado> empleadosCache;
     private LocalDate fechaSeleccionada;
-    private final Checkbox selectAllPCheckbox = new Checkbox("Seleccionar todos con 'P'",false);
+    private final Checkbox selectAllPCheckbox = new Checkbox("Seleccionar todos con 'P'", false);
     private final Map<RadioButtonGroup<TipoAsistencia>, Map<Long, Span>> radioButtonSpanMap = new HashMap<>();
-    private H4 getTitulo=new H4();
-    private Button cancelButton=new Button("Cancelar");
+    private H4 getTitulo = new H4();
+    private Button cancelButton = new Button("Cancelar");
 
     public RegistrarAsistencia(IEmpleadoService empleadoService, IAsistenciaService asistenciaService, ITipoAsistenciaService tipoAsistenciaService) {
         this.empleadoService = empleadoService;
@@ -61,15 +61,13 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
     }
 
     private void setUpToolbar() {
-
-
-
-        cancelButton.addClickListener(e -> {cancel();});
+        cancelButton.addClickListener(e -> {
+            cancel();
+        });
 
         Button saveButton = ComponentsUtils.createSaveButton(this::save);
 
-
-        HorizontalLayout buttonLayout = new HorizontalLayout(saveButton,cancelButton,selectAllPCheckbox);
+        HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, cancelButton, selectAllPCheckbox);
         buttonLayout.setSpacing(true);
 
         add(buttonLayout);
@@ -79,7 +77,6 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
         UI.getCurrent().navigate(AsistenciaView.class);
     }
 
-
     private void updateGrid() {
         if (tiposAsistenciaCache == null) {
             tiposAsistenciaCache = tipoAsistenciaService.findAll();
@@ -87,29 +84,22 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
 
         grid.setItems(empleadosCache);
 
-
         grid.addColumn(empleado -> {
                     String apellido = ComponentsUtils.capitalizeFirstLetter(empleado.getApellido());
                     String nombre = ComponentsUtils.capitalizeFirstLetter(empleado.getNombre());
-
-                    // Concatenar el apellido y nombre, sin formato adicional
                     return apellido + " " + nombre;
                 }).setHeader("Nombre Completo")
                 .setWidth("300px")
                 .setFlexGrow(0)
                 .setSortable(true);
 
-
         grid.addColumn(new ComponentRenderer<>(empleado -> {
-
             RadioButtonGroup<TipoAsistencia> radioGroup = new RadioButtonGroup<>();
             radioGroup.addClassName("mi-radio-group-pequeno");
             radioGroup.setItems(tiposAsistenciaCache);
             radioGroup.setItemLabelGenerator(TipoAsistencia::getAlias);
 
-
             Map<Long, Span> spanPorTipo = new HashMap<>();
-            asistenciaSeleccionada.put(empleado.getId(), radioGroup);
             radioButtonSpanMap.put(radioGroup, spanPorTipo); // Almacena la relación
 
             radioGroup.setRenderer(new ComponentRenderer<>(tipo -> {
@@ -121,22 +111,36 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
                 return span;
             }));
 
-            Long tipoAsistenciaId = asistenciasMap.get(empleado.getId());
-            TipoAsistencia asistenciaPrevia = tiposAsistenciaCache.stream()
-                    .filter(ta -> ta.getId().equals(tipoAsistenciaId))
-                    .findFirst()
-                    .orElseGet(() -> tiposAsistenciaCache.stream()
-                            .filter(ta -> "SR".equalsIgnoreCase(ta.getAlias()))
-                            .findFirst()
-                            .orElse(null));
-
-            if (asistenciaPrevia != null) {
-                radioGroup.setValue(asistenciaPrevia);
-                actualizarEstilo(spanPorTipo, asistenciaPrevia);
+            // Restaurar la selección si existe
+            Long tipoAsistenciaIdGuardado = asistenciaSeleccionada.get(empleado.getId());
+            if (tipoAsistenciaIdGuardado != null) {
+                tiposAsistenciaCache.stream()
+                        .filter(ta -> ta.getId().equals(tipoAsistenciaIdGuardado))
+                        .findFirst()
+                        .ifPresent(asistenciaPrevia -> {
+                            radioGroup.setValue(asistenciaPrevia);
+                            actualizarEstilo(spanPorTipo, asistenciaPrevia);
+                        });
+            } else {
+                // Establecer el valor por defecto "SR" si no hay selección previa
+                tiposAsistenciaCache.stream()
+                        .filter(ta -> "SR".equalsIgnoreCase(ta.getAlias()))
+                        .findFirst()
+                        .ifPresent(asistenciaSR -> {
+                            radioGroup.setValue(asistenciaSR);
+                            actualizarEstilo(spanPorTipo, asistenciaSR);
+                            asistenciaSeleccionada.put(empleado.getId(), asistenciaSR.getId()); // Guardar la selección inicial
+                        });
             }
 
             radioGroup.addValueChangeListener(event -> {
-                actualizarEstilo(spanPorTipo, event.getValue());
+                if (event.getValue() != null) {
+                    asistenciaSeleccionada.put(empleado.getId(), event.getValue().getId());
+                    actualizarEstilo(spanPorTipo, event.getValue());
+                } else {
+                    asistenciaSeleccionada.remove(empleado.getId()); // Eliminar si se deselecciona (opcional)
+                    actualizarEstilo(spanPorTipo, null);
+                }
             });
 
             return radioGroup;
@@ -159,26 +163,23 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
             if (tipoP.isEmpty() || tipoSR.isEmpty()) return;
 
             grid.getDataProvider().fetch(new Query<>()).forEach(empleado -> {
-                RadioButtonGroup<TipoAsistencia> radioGroup = asistenciaSeleccionada.get(empleado.getId());
-                if (radioGroup != null) {
-                    TipoAsistencia targetTipo = isChecked ? tipoP.get() : tipoSR.get();
-                    radioGroup.setValue(targetTipo);
+                // Actualizar el mapa de selección directamente
+                asistenciaSeleccionada.put(empleado.getId(), isChecked ? tipoP.get().getId() : tipoSR.get().getId());
 
-                    // Obtén el mapa de spans asociado a este RadioButtonGroup y actualiza el estilo
-                    Map<Long, Span> spanMap = radioButtonSpanMap.get(radioGroup);
-                    if (spanMap != null) {
-                        actualizarEstilo(spanMap, targetTipo);
-                    }
-                }
+                // Forzar la re-renderización de la fila para que el RadioButtonGroup se actualice
+                grid.getDataProvider().refreshItem(empleado);
             });
         });
     }
+
     private void registrarAsistencia(Empleado empleado) {
         // Implementación de la lógica para registrar asistencia de un empleado.
     }
+
     private void setUpForm() {
         // Código para configurar el formulario (ya estaba implementado)
     }
+
     private void search(String s) {
         String filtro = s.trim().toLowerCase();
 
@@ -194,6 +195,7 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
             grid.setItems(empleadosFiltrados);
         }
     }
+
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
         Location location = event.getLocation();
@@ -209,9 +211,8 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
         getTitulo.getStyle().set("margin-top", "20px");
         getTitulo.setText("Toma de asistencia del : " + fechaSeleccionada.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         add(getTitulo);
-
-
     }
+
     private void actualizarEstilo(Map<Long, Span> spanPorTipo, TipoAsistencia seleccionada) {
         for (Map.Entry<Long, Span> entry : spanPorTipo.entrySet()) {
             Span span = entry.getValue();
@@ -226,6 +227,7 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
             spanSeleccionado.getStyle().set("color", determineTextColor(backgroundColor));
         }
     }
+
     private String determineTextColor(String backgroundColor) {
         if (backgroundColor == null || backgroundColor.isEmpty()) {
             return "#000000";
@@ -236,9 +238,11 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
         double luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
         return luminance > 0.5 ? "#000000" : "#FFFFFF";
     }
+
     private void setUpTitle() {
-        ComponentsUtils.setTitulo(this, RegistrarAsistencia.class,String.valueOf(fechaSeleccionada.format((DateTimeFormatter.ofPattern("dd-MM-yyyy")))));
+        ComponentsUtils.setTitulo(this, RegistrarAsistencia.class, String.valueOf(fechaSeleccionada.format((DateTimeFormatter.ofPattern("dd-MM-yyyy")))));
     }
+
     private void save() {
         List<Asistencia> asistenciasAGuardar = new ArrayList<>();
         List<Asistencia> asistenciasActualizadas = new ArrayList<>();
@@ -248,20 +252,22 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
                 .stream()
                 .collect(Collectors.toMap(asistencia -> asistencia.getEmpleado().getId(), asistencia -> asistencia));
 
-        // 2. Iterar sobre las selecciones del usuario
-        for (Map.Entry<Long, RadioButtonGroup<TipoAsistencia>> entry : asistenciaSeleccionada.entrySet()) {
+        // 2. Iterar sobre las selecciones guardadas
+        for (Map.Entry<Long, Long> entry : asistenciaSeleccionada.entrySet()) {
             Long empleadoId = entry.getKey();
-            RadioButtonGroup<TipoAsistencia> radioGroup = entry.getValue();
-            TipoAsistencia tipoAsistencia = radioGroup.getValue();
-
-            if (tipoAsistencia == null) continue;
+            Long tipoAsistenciaId = entry.getValue();
 
             Empleado empleado = empleadosCache.stream()
                     .filter(e -> e.getId().equals(empleadoId))
                     .findFirst()
                     .orElse(null);
 
-            if (empleado != null) {
+            TipoAsistencia tipoAsistencia = tiposAsistenciaCache.stream()
+                    .filter(ta -> ta.getId().equals(tipoAsistenciaId))
+                    .findFirst()
+                    .orElse(null);
+
+            if (empleado != null && tipoAsistencia != null) {
                 Asistencia existingAsistencia = existingAsistenciasMap.get(empleadoId);
 
                 if (existingAsistencia != null) {
