@@ -79,14 +79,23 @@ public class TipoAsistenciaView extends VerticalLayout {
                 }).setHeader("Color").setWidth("60px").setFlexGrow(0);
         grid.addComponentColumn(tipoAsistencia -> {
 
-            Span editSpan = new Span(new Icon(VaadinIcon.EDIT)) {{ getStyle().set("cursor", "pointer"); addClickListener(e -> openFormForEdit(tipoAsistencia)); }};
-            Span deleteSpan = new Span(new Icon(VaadinIcon.TRASH)) {{ getStyle().set("cursor", "pointer");addClickListener(e -> delete(tipoAsistencia)); }};
+                    Span editSpan = new Span(new Icon(VaadinIcon.EDIT)) {{ getStyle().set("cursor", "pointer"); addClickListener(e -> openFormForEdit(tipoAsistencia)); }};
 
 
+                    return editSpan;
+                }).setHeader("Editar")
+                .setWidth("80px")
+                .setFlexGrow(0);
+
+        grid.addComponentColumn(tipoAsistencia -> {
 
 
-            return new HorizontalLayout(editSpan, deleteSpan);
-        }).setHeader("Acciones");
+                    Span deleteSpan = new Span(new Icon(VaadinIcon.TRASH)) {{ getStyle().set("cursor", "pointer");addClickListener(e -> delete(tipoAsistencia)); }};
+
+                    return deleteSpan;
+                }).setHeader("Eliminar")
+                .setWidth("80px")
+                .setFlexGrow(0);
         add(grid);
         updateGrid();
     }

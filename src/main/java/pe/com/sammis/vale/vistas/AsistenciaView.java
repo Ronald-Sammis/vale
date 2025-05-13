@@ -213,20 +213,38 @@ public class AsistenciaView extends VerticalLayout {
                 return fecha.toString(); // O maneja otros tipos de fecha si es necesario
             }
         }).setHeader("Fecha").setWidth("100px").setFlexGrow(0);
+
+
         grid.addComponentColumn(fecha -> {
 
-            Span editSpan = new Span(new Icon(VaadinIcon.EDIT)) {{ getStyle().set("cursor", "pointer"); addClickListener(e -> openFormForEdit(fecha)); }};
-            Span deleteSpan = new Span(new Icon(VaadinIcon.TRASH)) {{ getStyle().set("cursor", "pointer");addClickListener(e -> delete(fecha)); }};
-            Span viewSpan = new Span(new Icon(VaadinIcon.SEARCH)) {{ getStyle().set("cursor", "pointer");addClickListener(e -> view(fecha)); }};
+                    Span editSpan = new Span(new Icon(VaadinIcon.EDIT)) {{ getStyle().set("cursor", "pointer"); addClickListener(e -> openFormForEdit(fecha)); }};
 
 
+                    return editSpan;
+                }).setHeader("Editar")
+                .setWidth("80px")
+                .setFlexGrow(0);
+
+        grid.addComponentColumn(fecha -> {
 
 
+                    Span deleteSpan = new Span(new Icon(VaadinIcon.TRASH)) {{ getStyle().set("cursor", "pointer");addClickListener(e -> delete(fecha)); }};
+
+                    return deleteSpan;
+                }).setHeader("Eliminar")
+                .setWidth("80px")
+                .setFlexGrow(0);
+
+        grid.addComponentColumn(fecha -> {
 
 
+                    Span viewSpan = new Span(new Icon(VaadinIcon.SEARCH)) {{ getStyle().set("cursor", "pointer");addClickListener(e -> view(fecha)); }};
 
-            return new HorizontalLayout(editSpan, deleteSpan,viewSpan);
-        }).setHeader("Acciones");
+                    return viewSpan;
+                }).setHeader("Ver")
+                .setWidth("80px")
+                .setFlexGrow(0);
+
         add(grid);
         updateGrid();
     }
@@ -549,6 +567,7 @@ public class AsistenciaView extends VerticalLayout {
         int b = Integer.valueOf(backgroundColor.substring(5, 7), 16);
         double luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
         return luminance > 0.5 ? "#000000" : "#FFFFFF";
+
     }
     private void search(String s) {
         String filtro = s.trim().toLowerCase();

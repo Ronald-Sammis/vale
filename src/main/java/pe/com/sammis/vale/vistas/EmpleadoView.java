@@ -159,10 +159,24 @@ public class EmpleadoView extends VerticalLayout {
         grid.addComponentColumn(empleado -> {
 
             Span editSpan = new Span(new Icon(VaadinIcon.EDIT)) {{ getStyle().set("cursor", "pointer"); addClickListener(e -> openFormForEdit(empleado)); }};
+
+
+            return editSpan;
+        }).setHeader("Editar")
+        .setWidth("80px")
+        .setFlexGrow(0);
+
+        grid.addComponentColumn(empleado -> {
+
+
             Span deleteSpan = new Span(new Icon(VaadinIcon.TRASH)) {{ getStyle().set("cursor", "pointer");addClickListener(e -> delete(empleado)); }};
 
-            return new HorizontalLayout(editSpan, deleteSpan);
-        }).setHeader("Acciones");
+            return deleteSpan;
+        }).setHeader("Eliminar")
+        .setWidth("80px")
+        .setFlexGrow(0);
+
+
         add(grid);
         updateGrid();
 
