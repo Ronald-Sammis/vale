@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+
 
 html {
     --lumo-size-xl: 2.5rem;
@@ -130,3 +133,7 @@ vaadin-grid::part(cell) {
     animation: fadeIn 1s ease-in-out;  /* Duración de 1 segundo, puedes ajustarlo */
 }
 
+vaadin-grid::part(cell) {
+    font-family: 'Inter', sans-serif; /* o la fuente que uses */
+    font-size: 14px;
+}
