@@ -72,11 +72,9 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
 
         add(buttonLayout);
     }
-
     private void cancel() {
         UI.getCurrent().navigate(AsistenciaView.class);
     }
-
     private void updateGrid() {
         if (tiposAsistenciaCache == null) {
             tiposAsistenciaCache = tipoAsistenciaService.findAll();
@@ -89,7 +87,7 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
                     String nombre = ComponentsUtils.capitalizeFirstLetter(empleado.getNombre());
                     return apellido + " " + nombre;
                 }).setHeader("Nombre Completo")
-                .setWidth("300px")
+                .setWidth("220px")
                 .setFlexGrow(0)
                 .setSortable(true);
 
@@ -171,15 +169,12 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
             });
         });
     }
-
     private void registrarAsistencia(Empleado empleado) {
         // Implementación de la lógica para registrar asistencia de un empleado.
     }
-
     private void setUpForm() {
         // Código para configurar el formulario (ya estaba implementado)
     }
-
     private void search(String s) {
         String filtro = s.trim().toLowerCase();
 
@@ -195,7 +190,6 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
             grid.setItems(empleadosFiltrados);
         }
     }
-
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
         Location location = event.getLocation();
@@ -212,7 +206,6 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
         getTitulo.setText("Toma de asistencia del : " + fechaSeleccionada.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         add(getTitulo);
     }
-
     private void actualizarEstilo(Map<Long, Span> spanPorTipo, TipoAsistencia seleccionada) {
         for (Map.Entry<Long, Span> entry : spanPorTipo.entrySet()) {
             Span span = entry.getValue();
@@ -227,7 +220,6 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
             spanSeleccionado.getStyle().set("color", determineTextColor(backgroundColor));
         }
     }
-
     private String determineTextColor(String backgroundColor) {
         if (backgroundColor == null || backgroundColor.isEmpty()) {
             return "#000000";
@@ -238,11 +230,9 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
         double luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
         return luminance > 0.5 ? "#000000" : "#FFFFFF";
     }
-
     private void setUpTitle() {
         ComponentsUtils.setTitulo(this, RegistrarAsistencia.class, String.valueOf(fechaSeleccionada.format((DateTimeFormatter.ofPattern("dd-MM-yyyy")))));
     }
-
     private void save() {
         List<Asistencia> asistenciasAGuardar = new ArrayList<>();
         List<Asistencia> asistenciasActualizadas = new ArrayList<>();

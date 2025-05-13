@@ -143,7 +143,7 @@ public class EmpleadoView extends VerticalLayout {
     private void setUpGrid() {
 
         grid.setColumns();
-        grid.addColumn("dni").setWidth("100px").setFlexGrow(0);
+        grid.addColumn("dni").setWidth("80px").setFlexGrow(0);
         grid.addColumn(empleado -> {
                     String apellido = ComponentsUtils.capitalizeFirstLetter(empleado.getApellido());
                     String nombre = ComponentsUtils.capitalizeFirstLetter(empleado.getNombre());
@@ -151,7 +151,7 @@ public class EmpleadoView extends VerticalLayout {
                     // Concatenar el apellido y nombre, sin formato adicional
                     return apellido + " " + nombre;
                 }).setHeader("Nombre Completo")
-                .setWidth("300px")
+                .setWidth("220px")
                 .setFlexGrow(0)
                 .setSortable(true);
 

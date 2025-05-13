@@ -135,11 +135,12 @@ vaadin-grid::part(cell) {
 
 vaadin-grid::part(cell) {
     font-family: 'Inter', sans-serif; /* o la fuente que uses */
-    font-size: 14px;
+    font-size: 12px;
 }
 
 vaadin-grid::part(header-cell) {
     background-color:  #F2CB05; /* fondo tipo warning */
     color: black;
     font-weight: bold;
+    font-size: 14px;
 }
