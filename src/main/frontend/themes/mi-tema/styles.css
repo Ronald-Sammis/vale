@@ -113,3 +113,20 @@ vaadin-grid::part(cell) {
 }
 
 
+
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Aplica la animación fadeIn a la vista principal */
+.main-view {
+    animation: fadeIn 1s ease-in-out;  /* Duración de 1 segundo, puedes ajustarlo */
+}
+

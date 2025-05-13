@@ -19,11 +19,6 @@ public class MainView extends VerticalLayout {
         setSizeFull();
         setJustifyContentMode(JustifyContentMode.CENTER);
 
-        // Asegurar que la vista inicia con opacidad 0
-        getElement().getStyle().set("opacity", "0");
-
-        // Ejecutar la animación después de que la vista esté montada
-        getElement().executeJs("setTimeout(() => this.style.opacity = '1', 100);");
 
         add(new com.vaadin.flow.component.html.H2("Bienvenido a la vista MainView"));
 

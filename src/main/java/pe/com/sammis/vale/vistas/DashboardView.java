@@ -18,6 +18,7 @@ public class DashboardView extends VerticalLayout {
     private final IDashboardService dashboardService;
 
     public DashboardView(IDashboardService dashboardService) {
+        addClassName("main-view");
         this.dashboardService = dashboardService;
 
         setSpacing(true);
