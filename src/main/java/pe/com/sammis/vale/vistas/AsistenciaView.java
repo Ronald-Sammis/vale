@@ -119,7 +119,6 @@ public class AsistenciaView extends VerticalLayout {
         HorizontalLayout toolbar = new HorizontalLayout(fechaPicker, addButton, exportExelButton, exportPDFButton);
         add(toolbar);
     }
-
     private void exportPdf() {
         // 1. Cabeceras del Excel
         List<String> headers = List.of("ID", "Fecha", "Empleado", "Apellido", "Tipo de Asistencia");

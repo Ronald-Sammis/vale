@@ -53,17 +53,21 @@ public class MainLayout extends AppLayout {
         RouterLink dashBoardView = new RouterLink("DashBoard", DashboardView.class);
         dashBoardView.addComponentAsFirst(new Icon(VaadinIcon.CHART));
 
+        RouterLink pruebas = new RouterLink("PruebasView", PruebasView.class);
+        pruebas.addComponentAsFirst(new Icon(VaadinIcon.CHART));
+
 
         portalView.addClassName("sidebar-link");
         empleadoView.addClassName("sidebar-link");
         tipoView.addClassName("sidebar-link");
         asistencia.addClassName("sidebar-link");
         dashBoardView.addClassName("sidebar-link");
+        pruebas.addClassName("sidebar-link");
 
 
 
 
-        sidebar.add( portalView, empleadoView,tipoView,asistencia,dashBoardView);
+        sidebar.add( portalView, empleadoView,tipoView,asistencia,dashBoardView,pruebas);
 
         addToDrawer(sidebar);
     }

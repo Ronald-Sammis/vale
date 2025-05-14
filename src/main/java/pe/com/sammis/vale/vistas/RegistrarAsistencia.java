@@ -24,6 +24,7 @@ import pe.com.sammis.vale.services.interfaces.IAsistenciaService;
 import pe.com.sammis.vale.services.interfaces.IEmpleadoService;
 import pe.com.sammis.vale.services.interfaces.ITipoAsistenciaService;
 import pe.com.sammis.vale.util.ComponentsUtils;
+import pe.com.sammis.vale.util.TipoAsistenciaRadioButtonView;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -91,7 +92,7 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
                 .setFlexGrow(0)
                 .setSortable(true);
 
-        grid.addColumn(new ComponentRenderer<>(empleado -> {
+        /*grid.addColumn(new ComponentRenderer<>(empleado -> {
             RadioButtonGroup<TipoAsistencia> radioGroup = new RadioButtonGroup<>();
             radioGroup.addClassName("mi-radio-group-pequeno");
             radioGroup.setItems(tiposAsistenciaCache);
@@ -142,7 +143,48 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
             });
 
             return radioGroup;
+        })).setHeader("Tipo de Asistencia").setWidth("650px").setFlexGrow(0);*/
+
+        grid.addColumn(new ComponentRenderer<>(empleado -> {
+            TipoAsistenciaRadioButtonView radioView = new TipoAsistenciaRadioButtonView();
+            radioView.setItems(tiposAsistenciaCache);
+
+            // Buscar y establecer selección guardada
+            Long tipoAsistenciaIdGuardado = asistenciaSeleccionada.get(empleado.getId());
+            if (tipoAsistenciaIdGuardado != null) {
+                tiposAsistenciaCache.stream()
+                        .filter(ta -> ta.getId().equals(tipoAsistenciaIdGuardado))
+                        .findFirst()
+                        .ifPresent(radioView::setValue);
+            } else {
+                // Valor por defecto "SR"
+                tiposAsistenciaCache.stream()
+                        .filter(ta -> "SR".equalsIgnoreCase(ta.getAlias()))
+                        .findFirst()
+                        .ifPresent(sr -> {
+                            radioView.setValue(sr);
+                            asistenciaSeleccionada.put(empleado.getId(), sr.getId());
+                        });
+            }
+
+            // Listener para cambios de selección
+            radioView.getChildren().forEach(component -> {
+                if (component instanceof Span span) {
+                    span.addClickListener(event -> {
+                        tiposAsistenciaCache.stream()
+                                .filter(ta -> ta.getAlias().equals(span.getText()))
+                                .findFirst()
+                                .ifPresent(tipoSeleccionado -> {
+                                    radioView.setValue(tipoSeleccionado);
+                                    asistenciaSeleccionada.put(empleado.getId(), tipoSeleccionado.getId());
+                                });
+                    });
+                }
+            });
+
+            return radioView;
         })).setHeader("Tipo de Asistencia").setWidth("650px").setFlexGrow(0);
+
 
         grid.setHeight("380px");
 

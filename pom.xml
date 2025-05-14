@@ -7,7 +7,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.3</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <groupId>pe.com.sammis</groupId>
@@ -31,7 +31,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <vaadin.version>24.6.6</vaadin.version> <!-- Asegúrate de usar la misma versión en todo el proyecto -->
+        <vaadin.version>24.6.6</vaadin.version>
     </properties>
 
     <dependencies>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
-            <version>${vaadin.version}</version> <!-- Uso consistente de la versión de Vaadin -->
+            <version>${vaadin.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -65,8 +65,6 @@
             <scope>test</scope>
         </dependency>
 
-
-
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -76,15 +74,18 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20210307</version> <!-- Puedes usar la última versión disponible -->
+            <version>20210307</version>
         </dependency>
-
-
 
         <dependency>
             <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>5.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>5.2.3</version> <!-- o la versión más reciente -->
+            <version>5.2.3</version>
         </dependency>
 
         <dependency>
@@ -97,10 +98,6 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-charts-flow</artifactId>
         </dependency>
-
-
-
-
     </dependencies>
 
     <dependencyManagement>
@@ -144,7 +141,7 @@
             <plugin>
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-maven-plugin</artifactId>
-                <version>${vaadin.version}</version> <!-- Usa la misma versión aquí -->
+                <version>${vaadin.version}</version>
                 <executions>
                     <execution>
                         <id>frontend</id>

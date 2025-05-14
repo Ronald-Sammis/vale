@@ -144,3 +144,11 @@ vaadin-grid::part(header-cell) {
     font-weight: bold;
     font-size: 14px;
 }
+
+
+.radio-span.selected {
+    background-color: #1976d2; /* Azul */
+    color: white;
+    font-weight: bold;
+    border-color: #1976d2;
+}
