@@ -88,7 +88,7 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
                     String nombre = ComponentsUtils.capitalizeFirstLetter(empleado.getNombre());
                     return apellido + " " + nombre;
                 }).setHeader("Nombre Completo")
-                .setWidth("220px")
+                .setWidth("200px")
                 .setFlexGrow(0)
                 .setSortable(true);
 

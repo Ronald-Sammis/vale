@@ -50,7 +50,7 @@ public class TipoAsistenciaRadioButtonView extends HorizontalLayout {
         Span span = new Span(tipo.getAlias());
         span.addClassName("tipo-asistencia-radio-button");
         span.getStyle()
-                .set("padding", "4px 8px") // Reducido el padding
+                .set("padding", "2px 6px") // Reducido el padding
                 .set("border-radius", "8px")
                 .set("cursor", "pointer")
                 .set("font-weight", "normal")
