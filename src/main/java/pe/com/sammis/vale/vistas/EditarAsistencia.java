@@ -11,6 +11,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 
@@ -85,24 +86,27 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
         Button saveButton = new Button("Guardar", e -> save());
         Button cancelButton = new Button("Cancelar", e -> UI.getCurrent().navigate("asistencia"));
 
+        // CHECKBOX: "Seleccionar todos con 'P'"
         selectAllPCheckbox.addValueChangeListener(event -> {
-            if (event.getValue()) {
-                TipoAsistencia tipoP = tiposAsistenciaCache.stream()
-                        .filter(t -> t.getAlias().equalsIgnoreCase("P"))
-                        .findFirst()
-                        .orElse(null);
+            boolean isChecked = event.getValue();
 
-                if (tipoP != null) {
-                    radioButtonsPorEmpleado.forEach((id, radioView) -> {
-                        radioView.setValue(tipoP);
-                        asistenciaSeleccionada.put(id, tipoP.getId());
-                    });
-                    // Refrescar el grid para que los cambios se vean en UI:
-                    grid.getDataProvider().refreshAll();
-                }
-            } else {
-                // Si deselecciona el checkbox, podrías dejarlo sin efecto o implementar lógica aquí si quieres
-            }
+            Optional<TipoAsistencia> tipoP = tiposAsistenciaCache.stream()
+                    .filter(ta -> "P".equalsIgnoreCase(ta.getAlias()))
+                    .findFirst();
+
+            Optional<TipoAsistencia> tipoSR = tiposAsistenciaCache.stream()
+                    .filter(ta -> "SR".equalsIgnoreCase(ta.getAlias()))
+                    .findFirst();
+
+            if (tipoP.isEmpty() || tipoSR.isEmpty()) return;
+
+            grid.getDataProvider().fetch(new Query<>()).forEach(empleado -> {
+                // Actualizar el mapa de selección directamente
+                asistenciaSeleccionada.put(empleado.getId(), isChecked ? tipoP.get().getId() : tipoSR.get().getId());
+
+                // Forzar la re-renderización de la fila para que el RadioButtonGroup se actualice
+                grid.getDataProvider().refreshItem(empleado);
+            });
         });
 
         HorizontalLayout toolbar = new HorizontalLayout(saveButton, cancelButton, selectAllPCheckbox);
