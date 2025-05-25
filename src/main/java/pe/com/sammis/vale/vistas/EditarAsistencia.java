@@ -122,7 +122,9 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
             Div div = new Div();
             div.getElement().setProperty("innerHTML", "<b>" + empleado.getApellido() + "</b> " + empleado.getNombre());
             return div;
-        })).setHeader("Nombre Completo").setAutoWidth(true);
+        })).setHeader("Nombre Completo")
+            .setAutoWidth(true)
+            .setSortable(true);
 
         grid.addColumn(new ComponentRenderer<>(empleado -> {
             TipoAsistenciaRadioButtonView radioView = new TipoAsistenciaRadioButtonView();
