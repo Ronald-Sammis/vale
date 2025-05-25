@@ -85,7 +85,7 @@ public class AsistenciaView extends VerticalLayout {
         setUpTitle();
         setUpToolbar();
         setUpGrid();
-        setUpForm();
+       /* setUpForm();*/
     }
 
     private void setUpTitle() {
@@ -216,7 +216,18 @@ public class AsistenciaView extends VerticalLayout {
 
         grid.addComponentColumn(fecha -> {
 
-                    Span editSpan = new Span(new Icon(VaadinIcon.EDIT)) {{ getStyle().set("cursor", "pointer"); addClickListener(e -> openFormForEdit(fecha)); }};
+                    Span editSpan = new Span(new Icon(VaadinIcon.EDIT)) {{ getStyle().set("cursor", "pointer"); addClickListener(e -> {
+                        String fechaSeleccionada = fecha.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+
+                        // Todas las validaciones pasaron, se puede navegar
+                        Map<String, List<String>> parameters = new HashMap<>();
+                        parameters.put("fecha", List.of(fecha.toString()));
+                        UI.getCurrent().navigate("editar-asistencia", new QueryParameters(parameters));
+                    }); }};
+
+
+
 
 
                     return editSpan;
@@ -322,119 +333,7 @@ public class AsistenciaView extends VerticalLayout {
             return "black";
         }
     }
-    /*private void setUpForm() {
-        TextField searchField = ComponentsUtils.createSearchField("Buscar", this::search);
-        Button saveButton = ComponentsUtils.createSaveButton(this::save);
-        Button cancelButton = ComponentsUtils.createCancelButton(this::cancelForm);
-        Checkbox selectAllPCheckbox = new Checkbox("Seleccionar todos con 'P'");
-
-        HorizontalLayout titleLayout = new HorizontalLayout(titulo);
-        titleLayout.setSpacing(true);
-
-        HorizontalLayout buttonLayout = new HorizontalLayout(saveButton, cancelButton,searchField);
-        buttonLayout.setSpacing(true);
-
-        HorizontalLayout checkLayout = new HorizontalLayout( selectAllPCheckbox);
-        buttonLayout.setSpacing(true);
-
-        formLayout.setAlignItems(Alignment.BASELINE);
-
-        empleadoGrid.addThemeVariants(GridVariant.LUMO_WRAP_CELL_CONTENT, GridVariant.LUMO_COMPACT);
-        empleadoGrid.getElement().getStyle().set("font-size", "13px");
-        empleadoGrid.setWidth("750px");
-        empleadoGrid.addColumn(empleado -> "<b>" + empleado.getApellido() + "</b> " + empleado.getNombre())
-                .setHeader("Nombre Completo")
-                .setWidth("220px")
-                .setFlexGrow(0)
-                .setRenderer(new ComponentRenderer<>(item -> {
-                    Div div = new Div();
-                    div.getElement().setProperty("innerHTML", "<b>" + item.getApellido() + "</b> " + item.getNombre());
-                    return div;
-                })).setSortable(true);
-
-
-
-
-
-
-
-
-
-        empleadoGrid.addColumn(new ComponentRenderer<>(empleado -> {
-            RadioButtonGroup<TipoAsistencia> radioGroup = new RadioButtonGroup<>();
-            radioGroup.setItems(tiposAsistenciaCache);
-            radioGroup.setItemLabelGenerator(TipoAsistencia::getAlias);
-            radioGroup.setWidthFull();
-            radioGroup.addThemeVariants(RadioGroupVariant.LUMO_HELPER_ABOVE_FIELD);
-            radioGroup.getElement().getStyle().set("font-size", "10px");
-            radioGroup.getElement().getStyle().set("padding", "2px");
-            asistenciaSeleccionada.put(empleado.getId(), radioGroup);
-
-            // Obtener el ID de TipoAsistencia desde el mapa (si existe)
-            Long tipoAsistenciaId = asistenciasMap.get(empleado.getId());
-
-            // Intentamos obtener el tipo de asistencia por ID
-            TipoAsistencia asistenciaPrevia = tiposAsistenciaCache.stream()
-                    .filter(ta -> ta.getId().equals(tipoAsistenciaId))
-                    .findFirst()
-                    .orElse(null);
-
-            // Si no existe, buscamos "SR"
-            if (asistenciaPrevia == null) {
-                asistenciaPrevia = tiposAsistenciaCache.stream()
-                        .filter(ta -> "SR".equalsIgnoreCase(ta.getAlias()))  // Asegurándonos de que "SR" se busca correctamente
-                        .findFirst()
-                        .orElse(null);
-            }
-
-            // Verificar si encontramos el valor "SR" o el valor previo
-            if (asistenciaPrevia != null) {
-                radioGroup.setValue(asistenciaPrevia);  // Establecer el valor encontrado
-            } else {
-                // Agregar un log si no se encuentra "SR" ni un valor previo
-                System.out.println("No se encontró el tipo de asistencia 'SR' o el valor previo para el empleado con ID: " + empleado.getId());
-            }
-
-            return radioGroup;
-        })).setHeader("Tipo de Asistencia").setWidth("500px").setFlexGrow(0);
-
-        empleadoGrid.setItems(empleadosCache);
-        empleadoGrid.setHeight("400px");
-
-        formLayout.add(titleLayout, buttonLayout,checkLayout, empleadoGrid);
-        formDialog.add(formLayout);
-        formDialog.setCloseOnOutsideClick(false);
-
-        // **BLOQUE DE CÓDIGO DEL CHECKBOX (CORREGIDO)**
-        selectAllPCheckbox.addValueChangeListener(event -> {
-            boolean isChecked = event.getValue();
-            empleadoGrid.getDataProvider().fetch(new Query<>())
-                    .forEach(empleado -> {
-                        RadioButtonGroup<TipoAsistencia> radioGroup = asistenciaSeleccionada.get(empleado.getId());
-                        if (radioGroup != null) {
-                            radioGroup.getDataProvider().fetch(new Query<>())
-                                    .forEach(tipoAsistencia -> {
-                                        if ("P".equalsIgnoreCase(tipoAsistencia.getAlias())) {
-                                            if (isChecked) {
-                                                radioGroup.setValue(tipoAsistencia);
-                                            } else {
-                                                // Buscar y seleccionar "SR" al desactivar
-                                                radioGroup.getDataProvider().fetch(new Query<>())
-                                                        .filter(ta -> "SR".equalsIgnoreCase(ta.getAlias()))
-                                                        .findFirst()
-                                                        .ifPresentOrElse(
-                                                                radioGroup::setValue,
-                                                                radioGroup::clear // Si no se encuentra "SR", deseleccionar
-                                                        );
-                                            }
-                                        }
-                                    });
-                        }
-                    });
-        });
-        // **FIN DEL BLOQUE DE CÓDIGO DEL CHECKBOX (CORREGIDO)**
-    }*/
-    private void setUpForm() {
+   /* private void setUpForm() {
         TextField searchField = ComponentsUtils.createSearchField("Buscar", this::search);
         Button saveButton = ComponentsUtils.createSaveButton(this::save);
         Button cancelButton = ComponentsUtils.createCancelButton(this::cancelForm);
@@ -542,7 +441,7 @@ public class AsistenciaView extends VerticalLayout {
                         }
                     });
         });
-    }
+    }*/
     private void actualizarEstilo(Map<Long, Span> spanPorTipo, TipoAsistencia seleccionada) {
         for (Map.Entry<Long, Span> entry : spanPorTipo.entrySet()) {
             Span span = entry.getValue();
@@ -643,20 +542,6 @@ public class AsistenciaView extends VerticalLayout {
     }
     private void updateGrid() {
         grid.setItems(asistenciaService.findDistinctFechas());
-    }
-    private void openFormForNew(LocalDate fecha) {
-        if (!validarFecha(fecha)) return;
-        if (!validarExistenciaDeEmpleadosYTiposDeAsistencia()) return;
-
-        titulo.setText("Nueva Asistencia para el día: " + fecha.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
-        fechaPicker.setValue(fecha);
-
-        // Resetear las selecciones y el mapa de asistencias para el nuevo formulario
-        asistenciaSeleccionada.clear();
-        asistenciasMap.clear();
-
-        empleadoGrid.setItems(empleadosCache);
-        formDialog.open();
     }
     private void openFormForEdit(LocalDate fecha) {
         System.out.println("Intentando editar asistencias para la fecha: " + fecha);

@@ -18,73 +18,79 @@ public class TipoAsistenciaRadioButtonView extends HorizontalLayout {
 
     public TipoAsistenciaRadioButtonView() {
         addClassName("tipo-asistencia-radio-group");
-        // Disposición horizontal con espacio entre opciones
         getStyle()
                 .set("display", "flex")
-                .set("gap", "5px") // Reducido el espacio entre los spans
+                .set("gap", "5px")
                 .set("flex-direction", "row");
     }
 
-    // Configuramos las opciones
     public void setItems(List<TipoAsistencia> tiposAsistencia) {
+        removeAll(); // Limpiar opciones anteriores si las hay
         for (TipoAsistencia tipo : tiposAsistencia) {
             Span span = createRadioButtonSpan(tipo);
             span.addClickListener(event -> setValue(tipo));
             add(span);
         }
 
-        // Establecer el valor por defecto "SR" si está presente en la lista
         TipoAsistencia tipoSR = tiposAsistencia.stream()
                 .filter(tipo -> "SR".equals(tipo.getAlias()))
                 .findFirst()
                 .orElse(null);
 
-        // Si se encuentra "SR", lo establecemos como el seleccionado
         if (tipoSR != null) {
             setValue(tipoSR);
         }
     }
 
-    // Crear un Span como un radio button
     private Span createRadioButtonSpan(TipoAsistencia tipo) {
         Span span = new Span(tipo.getAlias());
         span.addClassName("tipo-asistencia-radio-button");
         span.getStyle()
-                .set("padding", "2px 6px") // Reducido el padding
+                .set("padding", "2px 6px")
                 .set("border-radius", "8px")
                 .set("cursor", "pointer")
                 .set("font-weight", "normal")
                 .set("transition", "all 0.2s ease")
-                .set("border", "1px solid #ccc");
+                .set("border", "1px solid #ccc")
+                .set("background-color", "transparent")
+                .set("color", "black");
 
-        // Establecer color de fondo según el tipo de asistencia
-        span.getStyle().set("background-color", tipo.getColorHex());
-        span.getStyle().set("color", getContrastingTextColor(tipo.getColorHex()));
+        // Establecer color de fondo si está seleccionado
+        if (selectedTipo != null && selectedTipo.equals(tipo)) {
+            span.getStyle()
+                    .set("background-color", tipo.getColorHex())
+                    .set("color", getContrastingTextColor(tipo.getColorHex()))
+                    .set("border", "2px solid " + tipo.getColorHex());
+        } else {
+            span.getStyle()
+                    .set("background-color", "transparent")
+                    .set("color", "black")
+                    .set("border", "1px solid #ccc");
+        }
 
         return span;
     }
 
-    // Establecer el valor seleccionado
     public void setValue(TipoAsistencia tipo) {
-        // Solo actualizamos si el valor es distinto
         if (this.selectedTipo != tipo) {
             this.selectedTipo = tipo;
             updateSelectionStyles(tipo);
         }
     }
 
-    // Actualizar estilos de selección
+    public TipoAsistencia getValue() {
+        return selectedTipo;
+    }
+
     private void updateSelectionStyles(TipoAsistencia selectedTipo) {
         for (Component component : this.getChildren().collect(Collectors.toList())) {
             if (component instanceof Span) {
                 Span span = (Span) component;
-                // Comprobamos si el span representa el tipo seleccionado
                 if (span.getText().equals(selectedTipo.getAlias())) {
                     span.getStyle()
                             .set("background-color", selectedTipo.getColorHex())
                             .set("color", getContrastingTextColor(selectedTipo.getColorHex()))
                             .set("border", "2px solid " + selectedTipo.getColorHex());
-
                 } else {
                     span.getStyle()
                             .set("background-color", "transparent")
@@ -96,7 +102,6 @@ public class TipoAsistenciaRadioButtonView extends HorizontalLayout {
         }
     }
 
-    // Obtener el color de texto contrastante
     private String getContrastingTextColor(String hexColor) {
         hexColor = hexColor.replace("#", "");
         int r = Integer.parseInt(hexColor.substring(0, 2), 16);

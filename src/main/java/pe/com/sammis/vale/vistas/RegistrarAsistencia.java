@@ -91,60 +91,6 @@ public class RegistrarAsistencia extends VerticalLayout implements HasUrlParamet
                 .setWidth("200px")
                 .setFlexGrow(0)
                 .setSortable(true);
-
-        /*grid.addColumn(new ComponentRenderer<>(empleado -> {
-            RadioButtonGroup<TipoAsistencia> radioGroup = new RadioButtonGroup<>();
-            radioGroup.addClassName("mi-radio-group-pequeno");
-            radioGroup.setItems(tiposAsistenciaCache);
-            radioGroup.setItemLabelGenerator(TipoAsistencia::getAlias);
-
-            Map<Long, Span> spanPorTipo = new HashMap<>();
-            radioButtonSpanMap.put(radioGroup, spanPorTipo); // Almacena la relación
-
-            radioGroup.setRenderer(new ComponentRenderer<>(tipo -> {
-                Span span = new Span(tipo.getAlias());
-                span.getStyle().set("padding", "3px 6px");
-                span.getStyle().set("border-radius", "4px");
-                span.getStyle().set("transition", "all 0.3s ease");
-                spanPorTipo.put(tipo.getId(), span);
-                return span;
-            }));
-
-            // Restaurar la selección si existe
-            Long tipoAsistenciaIdGuardado = asistenciaSeleccionada.get(empleado.getId());
-            if (tipoAsistenciaIdGuardado != null) {
-                tiposAsistenciaCache.stream()
-                        .filter(ta -> ta.getId().equals(tipoAsistenciaIdGuardado))
-                        .findFirst()
-                        .ifPresent(asistenciaPrevia -> {
-                            radioGroup.setValue(asistenciaPrevia);
-                            actualizarEstilo(spanPorTipo, asistenciaPrevia);
-                        });
-            } else {
-                // Establecer el valor por defecto "SR" si no hay selección previa
-                tiposAsistenciaCache.stream()
-                        .filter(ta -> "SR".equalsIgnoreCase(ta.getAlias()))
-                        .findFirst()
-                        .ifPresent(asistenciaSR -> {
-                            radioGroup.setValue(asistenciaSR);
-                            actualizarEstilo(spanPorTipo, asistenciaSR);
-                            asistenciaSeleccionada.put(empleado.getId(), asistenciaSR.getId()); // Guardar la selección inicial
-                        });
-            }
-
-            radioGroup.addValueChangeListener(event -> {
-                if (event.getValue() != null) {
-                    asistenciaSeleccionada.put(empleado.getId(), event.getValue().getId());
-                    actualizarEstilo(spanPorTipo, event.getValue());
-                } else {
-                    asistenciaSeleccionada.remove(empleado.getId()); // Eliminar si se deselecciona (opcional)
-                    actualizarEstilo(spanPorTipo, null);
-                }
-            });
-
-            return radioGroup;
-        })).setHeader("Tipo de Asistencia").setWidth("650px").setFlexGrow(0);*/
-
         grid.addColumn(new ComponentRenderer<>(empleado -> {
             TipoAsistenciaRadioButtonView radioView = new TipoAsistenciaRadioButtonView();
             radioView.setItems(tiposAsistenciaCache);
