@@ -20,7 +20,6 @@ import pe.com.sammis.vale.models.TipoAsistencia;
 import pe.com.sammis.vale.services.interfaces.IAsistenciaService;
 import pe.com.sammis.vale.services.interfaces.IEmpleadoService;
 import pe.com.sammis.vale.services.interfaces.ITipoAsistenciaService;
-import pe.com.sammis.vale.util.ComponentsUtils;
 import pe.com.sammis.vale.util.TipoAsistenciaRadioButtonView;
 
 import java.time.LocalDate;
@@ -44,7 +43,6 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
     private final H4 titulo = new H4();
     private final Checkbox selectAllPCheckbox = new Checkbox("Seleccionar todos con 'P'");
     private final Map<Long, Long> asistenciaSeleccionada = new HashMap<>();
-    // Cambio importante: mapa con tu componente personalizado
     private final Map<Long, TipoAsistenciaRadioButtonView> radioButtonsPorEmpleado = new HashMap<>();
 
     public EditarAsistencia(IEmpleadoService empleadoService, IAsistenciaService asistenciaService, ITipoAsistenciaService tipoAsistenciaService) {
@@ -54,7 +52,6 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
 
         setSizeFull();
 
-        // Cargar datos base
         this.empleadosCache = empleadoService.findAllActive();
         this.tiposAsistenciaCache = tipoAsistenciaService.findAll();
 
@@ -75,16 +72,18 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
             return;
         }
 
-        titulo.setText("Editar asistencia del: " + fechaSeleccionada);
+        titulo.setText("Editar asistencia del: " + fechaSeleccionada.format(DateTimeFormatter.ofPattern("dd-MM-yyyy")));
         titulo.getStyle().set("margin-top", "20px");
-        add(titulo);
+        if (!formLayout.getChildren().anyMatch(c -> c.equals(titulo))) {
+            formLayout.addComponentAtIndex(0, titulo);
+        }
 
         updateGrid();
     }
 
     private void setUpToolbar() {
         Button saveButton = new Button("Guardar", e -> save());
-        Button cancelButton = new Button("Cancelar", e -> UI.getCurrent().navigate("asistencia")); // Ajustar ruta si es necesario
+        Button cancelButton = new Button("Cancelar", e -> UI.getCurrent().navigate("asistencia"));
 
         selectAllPCheckbox.addValueChangeListener(event -> {
             if (event.getValue()) {
@@ -94,8 +93,15 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
                         .orElse(null);
 
                 if (tipoP != null) {
-                    radioButtonsPorEmpleado.forEach((id, radioView) -> radioView.setValue(tipoP));
+                    radioButtonsPorEmpleado.forEach((id, radioView) -> {
+                        radioView.setValue(tipoP);
+                        asistenciaSeleccionada.put(id, tipoP.getId());
+                    });
+                    // Refrescar el grid para que los cambios se vean en UI:
+                    grid.getDataProvider().refreshAll();
                 }
+            } else {
+                // Si deselecciona el checkbox, podrías dejarlo sin efecto o implementar lógica aquí si quieres
             }
         });
 
@@ -114,12 +120,10 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
             return div;
         })).setHeader("Nombre Completo").setAutoWidth(true);
 
-        // Columna con tu componente personalizado
         grid.addColumn(new ComponentRenderer<>(empleado -> {
             TipoAsistenciaRadioButtonView radioView = new TipoAsistenciaRadioButtonView();
             radioView.setItems(tiposAsistenciaCache);
 
-            // Cargar selección previa si existe
             Long tipoAsistenciaIdGuardado = asistenciaSeleccionada.get(empleado.getId());
             if (tipoAsistenciaIdGuardado != null) {
                 tiposAsistenciaCache.stream()
@@ -127,7 +131,6 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
                         .findFirst()
                         .ifPresent(radioView::setValue);
             } else {
-                // Valor por defecto (ejemplo "SR")
                 tiposAsistenciaCache.stream()
                         .filter(ta -> "SR".equalsIgnoreCase(ta.getAlias()))
                         .findFirst()
@@ -137,7 +140,6 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
                         });
             }
 
-            // Listener para cambios de selección
             radioView.getChildren().forEach(component -> {
                 if (component instanceof Span span) {
                     span.addClickListener(event -> {
@@ -152,9 +154,7 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
                 }
             });
 
-            // Guardar referencia para usar luego
             radioButtonsPorEmpleado.put(empleado.getId(), radioView);
-
             return radioView;
         })).setHeader("Tipo de Asistencia").setWidth("650px").setFlexGrow(0);
 
@@ -163,29 +163,20 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
 
     private void updateGrid() {
         List<Asistencia> asistencias = asistenciaService.findByFecha(fechaSeleccionada);
-        Map<Long, Long> asistenciasMap = asistencias.stream()
-                .collect(Collectors.toMap(a -> a.getEmpleado().getId(), a -> a.getTipoAsistencia().getId()));
 
+        asistenciaSeleccionada.clear();
+        radioButtonsPorEmpleado.clear();
+
+        for (Asistencia asistencia : asistencias) {
+            asistenciaSeleccionada.put(asistencia.getEmpleado().getId(), asistencia.getTipoAsistencia().getId());
+        }
+
+        // Solo actualizamos los items, NO tocamos las columnas:
         grid.setItems(empleadosCache);
-
-        // Preseleccionar valores en componentes existentes
-        empleadosCache.forEach(empleado -> {
-            TipoAsistenciaRadioButtonView radioView = radioButtonsPorEmpleado.get(empleado.getId());
-            if (radioView != null) {
-                Long tipoId = asistenciasMap.get(empleado.getId());
-                TipoAsistencia tipo = tiposAsistenciaCache.stream()
-                        .filter(t -> t.getId().equals(tipoId))
-                        .findFirst()
-                        .orElseGet(() -> tiposAsistenciaCache.stream()
-                                .filter(t -> t.getAlias().equalsIgnoreCase("SR"))
-                                .findFirst().orElse(null));
-                if (tipo != null) {
-                    radioView.setValue(tipo);
-                    asistenciaSeleccionada.put(empleado.getId(), tipo.getId());
-                }
-            }
-        });
+        // Refresca para que la UI se actualice con la nueva data:
+        grid.getDataProvider().refreshAll();
     }
+
 
     private void save() {
         List<Asistencia> asistencias = new ArrayList<>();
@@ -200,14 +191,12 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
             if (seleccionada == null) continue;
 
             if (existentes.containsKey(empleado.getId())) {
-                // Actualizar
                 Asistencia existente = existentes.get(empleado.getId());
                 if (!existente.getTipoAsistencia().getId().equals(seleccionada.getId())) {
                     existente.setTipoAsistencia(seleccionada);
                     asistencias.add(existente);
                 }
             } else {
-                // Nueva
                 Asistencia nueva = new Asistencia();
                 nueva.setEmpleado(empleado);
                 nueva.setTipoAsistencia(seleccionada);
@@ -218,6 +207,6 @@ public class EditarAsistencia extends VerticalLayout implements HasUrlParameter<
 
         asistenciaService.saveAll(asistencias);
         Notification.show("Asistencias actualizadas", 3000, Notification.Position.TOP_CENTER);
-        UI.getCurrent().navigate("asistencia"); // Ajustar ruta si es necesario
+        UI.getCurrent().navigate("asistencia");
     }
 }
